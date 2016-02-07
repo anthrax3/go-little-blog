@@ -13,8 +13,8 @@
 		{{range $key,$value:=.Posts}}	
   			<li>
 				<h3>Номер поста- {{$value.Id}}</h3>		
-				<h4>{{$value.Title}}</h4>		
-				<p>{{$value.ContentText}}</p>
+				<h4>{{$value.Title | unescape}}</h4>		
+				<p>{{$value.ContentText | unescape }}</p>
 			</li>
 		{{end}}
 		</ol>

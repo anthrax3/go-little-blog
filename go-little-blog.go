@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"os"
 	//	"strconv"
+	"html/template"
 	"strings"
 
 	"github.com/go-martini/martini"
 	//	"github.com/martini-contrib/auth"
 	"github.com/martini-contrib/render"
+	"github.com/russross/blackfriday"
 
 	//	"image"
 	//	_ "image/gif"
@@ -62,6 +64,14 @@ func Print(p []Post) {
 //}
 
 //------------ END Объявление типов и глобальных переменных
+
+func unescape(x string) interface{} {
+	return template.HTML(x)
+}
+
+func ConvertMarkdownToHtml(markdown string) string {
+	return string(blackfriday.MarkdownBasic([]byte(markdown)))
+}
 
 //возвращает список имен файлов в директории dirname
 func Getlistfileindirectory(dirname string) []string {
@@ -146,7 +156,11 @@ func GetPostfromFile(namef string) Post {
 			scontent = str[sposts+1:]
 		}
 	}
-	res := Post{Id: namef, Title: stitle, ContentText: scontent}
+
+	//	fmt.Println(ConvertMarkdownToHtml(scontent))
+
+	res := Post{Id: namef, Title: ConvertMarkdownToHtml(stitle), ContentText: ConvertMarkdownToHtml(scontent)}
+	//	res := Post{Id: namef, Title: stitle, ContentText: scontent}
 	return res
 }
 
@@ -168,22 +182,6 @@ func indexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 
 // посты блога
 func PostsHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
-	//	nstr, _ := strconv.Atoi(params["nstr"])
-	//	//	var tt TTasker
-	//	shop := params["shop"]
-	//	fmt.Println(shop)
-
-	//	namef := pathcfguser + string(user) + string(os.PathSeparator) + shop + "-url.cfg"
-
-	//	s := readfiletxt(namef)
-	//	ss := strings.Split(s, "\n")
-
-	//	ts := strings.Split(ss[nstr], ";")
-	//	if len(ts) == 4 {
-	////		tt = TTasker{Url: ts[0], Uslovie: ts[1], Price: ts[2], Shop: shop, Nstr: params["nstr"]}
-	//	}
-
-	//	rr.HTML(200, "edit", &tt)
 }
 
 func main() {
@@ -194,12 +192,14 @@ func main() {
 	//	}
 
 	pathposts = "posts"
+	unescapeFuncMap := template.FuncMap{"unescape": unescape}
 
 	m.Use(render.Renderer(render.Options{
-		Directory:  "templates", // Specify what path to load the templates from.
-		Layout:     "layout",    // Specify a layout template. Layouts can call {{ yield }} to render the current template.
-		Charset:    "UTF-8",     // Sets encoding for json and html content-types. Default is "UTF-8".
-		IndentJSON: true,        // Output human readable JSON
+		Directory:  "templates",                         // Specify what path to load the templates from.
+		Layout:     "layout",                            // Specify a layout template. Layouts can call {{ yield }} to render the current template.
+		Charset:    "UTF-8",                             // Sets encoding for json and html content-types. Default is "UTF-8".
+		IndentJSON: true,                                // Output human readable JSON
+		Funcs:      []template.FuncMap{unescapeFuncMap}, // Specify helper function maps for templates to access.
 		Extensions: []string{".tmpl", ".html"}}))
 
 	//	m.Use(auth.BasicFunc(authFunc))
