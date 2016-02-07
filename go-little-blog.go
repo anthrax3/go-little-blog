@@ -1,16 +1,16 @@
 package main
 
 import (
-	"flag"
+	//	"flag"
 	"fmt"
 	//	"html/template"
 	"net/http"
 	"os"
-	"strconv"
+	//	"strconv"
 	"strings"
 
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/auth"
+	//	"github.com/martini-contrib/auth"
 	"github.com/martini-contrib/render"
 
 	//	"image"
@@ -27,21 +27,64 @@ var (
 )
 
 var (
-	//	taskT       TaskerTovar
-	tekuser     string // текущий пользователь который задает условия на срабатывания
-	pathcfg     string // адрес где находятся папки пользователей, если пустая строка, то текущая папка
-	pathcfguser string
+	//	pathcfg     string // адрес где находятся папки пользователей, если пустая строка, то текущая папка
+	//	pathcfguser string
+	pathposts string // папка в которой нах-ся посты блога
 )
 
-type page struct {
-	Title  string
-	Msg    string
-	Msg2   string
-	TekUsr string
-	Shops  map[string]string
+// структура поста в блоге
+type Post struct {
+	Id          string
+	Title       string
+	ContentText string
 }
 
+//данные для генерации страницы html
+type PagePost struct {
+	TitlePage string
+	Posts     []Post
+}
+
+func (p *Post) Print() {
+	fmt.Println("Id post: ", p.Id)
+	fmt.Println("Title post: ", p.Title)
+	fmt.Println("ContentText post: ", p.ContentText)
+}
+
+func Print(p []Post) {
+	for _, v := range p {
+		v.Print()
+	}
+}
+
+//func NewPost(id, title, contentHtml, contentMarkdown string) *Post {
+//	return &Post{id, title, contentHtml, contentMarkdown}
+//}
+
 //------------ END Объявление типов и глобальных переменных
+
+//возвращает список имен файлов в директории dirname
+func Getlistfileindirectory(dirname string) []string {
+	listfile := make([]string, 0)
+	d, err := os.Open(dirname)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer d.Close()
+	fi, err := d.Readdir(-1)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	for _, fi := range fi {
+		if fi.Mode().IsRegular() {
+			//fmt.Println(fi.Name(), fi.Size(), "bytes")
+			listfile = append(listfile, fi.Name())
+		}
+	}
+	return listfile
+}
 
 // сохранить в новый файл
 func SaveNewstrtofile(namef string, str string) int {
@@ -69,12 +112,6 @@ func Savestrtofile(namef string, str string) int {
 	return 0
 }
 
-//сохранение данных из TTasker товара в файл с именем namef
-func savetofilecfg(namef string, t TTasker) {
-	str := t.Url + ";" + t.Uslovie + ";" + t.Price + ";" + "\n"
-	Savestrtofile(namef, str)
-}
-
 //// чтение файла с именем namefи возвращение содержимое файла, иначе текст ошибки
 func readfiletxt(namef string) string {
 	file, err := os.Open(namef)
@@ -96,132 +133,82 @@ func readfiletxt(namef string) string {
 	return string(bs)
 }
 
-func indexHandler(user auth.User, rr render.Render, w http.ResponseWriter, r *http.Request) {
-	rr.HTML(200, "index", &page{Title: "Йоу Начало", Msg: "Начальная страница", TekUsr: "Текущий пользователь: " + string(user)})
-}
+// полчение текста поста блогна из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
+func GetPostfromFile(namef string) Post {
+	str := readfiletxt(namef)
 
-func AddTaskHandler(user auth.User, rr render.Render, w http.ResponseWriter, r *http.Request) {
-	pp := page{Title: "Создание триггера", Msg: "Задание триггера (условия) на срабатывание бота цен", TekUsr: "Текущий пользователь: " + string(user)}
-	pp.Shops = map[string]string{
-		"labirint":   "Лабиринт",
-		"ulmart":     "Юлмарт",
-		"citilink":   "Ситилинк",
-		"dns":        "ДНС",
-		"mvideo":     "МВидео",
-		"eldorado":   "Эльдорадо",
-		"aliexpress": "Алиэкспресс",
-	}
-	rr.HTML(200, "addtask", &pp)
-}
-
-// обработка редактирования задания
-func EditTaskHandler(user auth.User, rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
-	nstr, _ := strconv.Atoi(params["nstr"])
-	var tt TTasker
-	shop := params["shop"]
-	fmt.Println(shop)
-
-	namef := pathcfguser + string(user) + string(os.PathSeparator) + shop + "-url.cfg"
-
-	s := readfiletxt(namef)
-	ss := strings.Split(s, "\n")
-
-	ts := strings.Split(ss[nstr], ";")
-	if len(ts) == 4 {
-		tt = TTasker{Url: ts[0], Uslovie: ts[1], Price: ts[2], Shop: shop, Nstr: params["nstr"]}
-	}
-
-	rr.HTML(200, "edit", &tt)
-}
-
-// обработка удаления задания
-func DelTaskHandler(user auth.User, rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
-	nstr, _ := strconv.Atoi(params["nstr"])
-	//	var tt TTasker
-	shop := params["shop"]
-	//	fmt.Println(shop)
-	namef := pathcfguser + string(user) + string(os.PathSeparator) + shop + "-url.cfg"
-	s := readfiletxt(namef)
-	ss := strings.Split(s, "\n")
-	//	if (nstr >= 0) && (nstr < len(ss)) {
-	str := ""
-	for i, v := range ss {
-		if i != nstr {
-			str += v + "\n"
+	sposts := strings.Index(str, "\n") // поиск первой строки - заголовка сообщения
+	stitle := ""
+	scontent := ""
+	if sposts != -1 {
+		stitle = str[0:sposts]
+		if sposts+1 <= len(str) {
+			scontent = str[sposts+1:]
 		}
 	}
-	fmt.Println("str= ", str)
-	SaveNewstrtofile(namef, str)
-	//	}
-	rr.Redirect("/")
+	res := Post{Id: namef, Title: stitle, ContentText: scontent}
+	return res
 }
 
-// выбор магазина который будет выбран для вывода содержимого cfg файла
-func clickViewTaskHandler(user auth.User, rr render.Render, w http.ResponseWriter, r *http.Request) {
-	pp := page{TekUsr: string(user)}
-	pp.Shops = map[string]string{
-		"labirint":   "Лабиринт",
-		"ulmart":     "Юлмарт",
-		"citilink":   "Ситилинк",
-		"dns":        "ДНС",
-		"mvideo":     "МВидео",
-		"eldorado":   "Эльдорадо",
-		"aliexpress": "Алиэкспресс",
-	}
-	rr.HTML(200, "clickview", &pp)
-}
+func indexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 
-// просмотр заданий выбранного магазина
-func ViewTaskHandler(user auth.User, rr render.Render, w http.ResponseWriter, r *http.Request) {
-	shop := r.FormValue("shop")
-	tt := make([]TTasker, 0)
-	s := readfiletxt(pathcfguser + string(user) + string(os.PathSeparator) + shop + "-url.cfg")
-	ss := strings.Split(s, "\n")
-	for _, v := range ss {
-		ts := strings.Split(v, ";")
-		if len(ts) == 4 {
-			tt = append(tt, TTasker{Url: ts[0], Uslovie: ts[1], Price: ts[2], Shop: shop})
+	//	namef := ""
+	namefs := Getlistfileindirectory(pathposts)
+	p := make([]Post, 0)
+	if len(namefs) != 0 {
+		for _, namef := range namefs {
+			p = append(p, GetPostfromFile(pathposts+string(os.PathSeparator)+namef))
 		}
-	}
-	rr.HTML(200, "view", &tt)
-}
-
-func ExecHandler(user auth.User, rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
-	var tt TTasker
-	nstr, _ := strconv.Atoi(params["nstr"])
-	//	shop := params["shop"]
-	shop := r.FormValue("shop")
-
-	tt.Shop = r.FormValue("shop")
-	tt.Url = r.FormValue("surl")
-	tt.Uslovie = r.FormValue("uslovie")
-	tt.Price = r.FormValue("schislo")
-
-	if _, err := os.Stat(pathcfguser + string(user)); os.IsNotExist(err) {
-		os.Mkdir(pathcfguser+string(user), 0776)
-	}
-	namef := pathcfguser + string(user) + string(os.PathSeparator) + shop + "-url.cfg"
-
-	if nstr == -1 {
-		savetofilecfg(namef, tt)
 	} else {
-		s := readfiletxt(namef)
-		ss := strings.Split(s, "\n")
-		if nstr <= (len(ss) - 1) {
-			ss[nstr] = tt.Url + ";" + tt.Uslovie + ";" + tt.Price + ";"
-		}
-		str := ""
-		for _, v := range ss {
-			if v != "" {
-				str += v + "\n"
-			}
-		}
-		SaveNewstrtofile(namef, str)
+		p = append(p, Post{Id: "ПОСТОВ НЕТ", Title: "ЭТОТ БЛОГ ПУСТ. ПРИХОДИТЕ ПОЗЖЕ ;)", ContentText: ""})
 	}
 
-	ss1 := "Введенное условие для магазина " + shop
-	ss := tt.Url + "   " + tt.Uslovie + " " + tt.Price
-	rr.HTML(200, "exec", &page{Title: "Введенное условие для магазина " + shop, Msg: ss, Msg2: ss1})
+	rr.HTML(200, "index", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p})
+}
+
+// посты блога
+func PostsHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
+	//	nstr, _ := strconv.Atoi(params["nstr"])
+	//	//	var tt TTasker
+	//	shop := params["shop"]
+	//	fmt.Println(shop)
+
+	//	namef := pathcfguser + string(user) + string(os.PathSeparator) + shop + "-url.cfg"
+
+	//	s := readfiletxt(namef)
+	//	ss := strings.Split(s, "\n")
+
+	//	ts := strings.Split(ss[nstr], ";")
+	//	if len(ts) == 4 {
+	////		tt = TTasker{Url: ts[0], Uslovie: ts[1], Price: ts[2], Shop: shop, Nstr: params["nstr"]}
+	//	}
+
+	//	rr.HTML(200, "edit", &tt)
+}
+
+func main() {
+	m := martini.Classic()
+
+	//	if !parse_args() {
+	//		return
+	//	}
+
+	pathposts = "posts"
+
+	m.Use(render.Renderer(render.Options{
+		Directory:  "templates", // Specify what path to load the templates from.
+		Layout:     "layout",    // Specify a layout template. Layouts can call {{ yield }} to render the current template.
+		Charset:    "UTF-8",     // Sets encoding for json and html content-types. Default is "UTF-8".
+		IndentJSON: true,        // Output human readable JSON
+		Extensions: []string{".tmpl", ".html"}}))
+
+	//	m.Use(auth.BasicFunc(authFunc))
+
+	m.Get("/", indexHandler)
+	//	m.Get("/posts"--как это было --может и ничего и не было., PostsHandler)
+	//	m.Post("/exec/:shop/:nstr", ExecHandler)
+	m.RunOnAddr(":1111")
+
 }
 
 //func authFunc(username, password string) bool {
@@ -241,35 +228,3 @@ func ExecHandler(user auth.User, rr render.Render, w http.ResponseWriter, r *htt
 //	}
 //	return true
 //}
-
-func main() {
-	m := martini.Classic()
-
-	if !parse_args() {
-		return
-	}
-
-	if pathcfg == "" {
-		pathcfguser = ""
-	} else {
-		pathcfguser = pathcfg + string(os.PathSeparator)
-	}
-
-	m.Use(render.Renderer(render.Options{
-		Directory:  "templates", // Specify what path to load the templates from.
-		Layout:     "layout",    // Specify a layout template. Layouts can call {{ yield }} to render the current template.
-		Extensions: []string{".tmpl", ".html"}}))
-
-	//	m.Use(auth.BasicFunc(authFunc))
-
-	m.Get("/", indexHandler)
-	m.Get("/addtask", AddTaskHandler)
-	m.Get("/edit/:shop/:nstr", EditTaskHandler)
-	m.Get("/del/:shop/:nstr", DelTaskHandler)
-	m.Post("/exec/:shop/:nstr", ExecHandler)
-	m.Post("/view", ViewTaskHandler)
-	m.Get("/clickview", clickViewTaskHandler)
-	m.Get("/", indexHandler)
-	m.RunOnAddr(":7777")
-
-}
