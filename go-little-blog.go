@@ -199,13 +199,14 @@ func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 	rr.Redirect("/")
 }
 
-// посты блога
+// просмотр посты блога
 func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
 	p := make([]Post, 0)
 	numpost, _ := strconv.Atoi(params["numpost"])
 	if numpost < 0 {
 		rr.Redirect("/")
 	}
+
 	namefs := Getlistfileindirectory(pathposts)
 	if numpost > len(namefs) {
 		numpost = numpost - kolpost
