@@ -4,10 +4,10 @@ import (
 	//	"flag"
 	"fmt"
 	//	"html/template"
+	"html/template"
 	"net/http"
 	"os"
-	//	"strconv"
-	"html/template"
+	"strconv"
 	"strings"
 
 	"github.com/go-martini/martini"
@@ -31,6 +31,8 @@ var (
 var (
 	pathposts string // папка в которой нах-ся посты блога
 	pathhtml  string // папка в которой нах-ся обычные html страницы блога
+	kolpost   int    // кол-во постов (сообщений) на главной странице блога
+	tekpost   int    // номер сообщения с которого начинается сообщения на странице
 )
 
 // структура поста в блоге
@@ -44,6 +46,8 @@ type Post struct {
 type PagePost struct {
 	TitlePage string
 	Posts     []Post
+	postleft  int // кол-во сообщений влево , т.е. более поздние
+	postright int // кол-во сообщений вправо , т.е. более ранние
 }
 
 func (p *Post) Print() {
@@ -163,9 +167,10 @@ func indexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 
 	//	namef := ""
 	namefs := Getlistfileindirectory(pathposts)
+	tnamefs := namefs[:kolpost]
 	p := make([]Post, 0)
 	if len(namefs) != 0 {
-		for _, namef := range namefs {
+		for _, namef := range tnamefs {
 			p = append(p, GetPostfromFile(pathposts+string(os.PathSeparator)+namef))
 		}
 	} else {
@@ -193,8 +198,22 @@ func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 	rr.Redirect("/")
 }
 
+// посты блога
+func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
+	p := make([]Post, 0)
+	numpost, _ := strconv.Atoi(params["namepage"])
+	namefs := Getlistfileindirectory(pathhtml)
+	if len(namefs) != 0 {
+		for i := numpost; i < numpost+kolpost-1; i++ {
+			namef := strconv.Itoa(i) + ".md"
+			p = append(p, GetPostfromFile(pathposts+string(os.PathSeparator)+namef))
+		}
+	}
+	rr.HTML(200, "index", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p})
+}
+
 func main() {
-	parports := "80"
+	parports := "1111"
 	m := martini.Classic()
 
 	//	martini.Env = martini.Prod
@@ -205,6 +224,7 @@ func main() {
 
 	pathposts = "posts"
 	pathhtml = "html"
+	kolpost = 3
 	unescapeFuncMap := template.FuncMap{"unescape": unescape}
 
 	staticOptions := martini.StaticOptions{Prefix: "assets"}
@@ -220,6 +240,7 @@ func main() {
 
 	m.Get("/", indexHandler)
 	m.Post("/html/:namepage", HtmlHandler)
+	m.Post("/view/:numpost", ViewHandler)
 	//	m.Get("/posts"--как это было --может и ничего и не было., PostsHandler)
 	//	m.Post("/exec/:shop/:nstr", ExecHandler)
 	m.RunOnAddr(":" + parports)
