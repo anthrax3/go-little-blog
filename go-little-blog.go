@@ -29,9 +29,8 @@ var (
 )
 
 var (
-	//	pathcfg     string // адрес где находятся папки пользователей, если пустая строка, то текущая папка
-	//	pathcfguser string
 	pathposts string // папка в которой нах-ся посты блога
+	pathhtml  string // папка в которой нах-ся обычные html страницы блога
 )
 
 // структура поста в блоге
@@ -58,10 +57,6 @@ func Print(p []Post) {
 		v.Print()
 	}
 }
-
-//func NewPost(id, title, contentHtml, contentMarkdown string) *Post {
-//	return &Post{id, title, contentHtml, contentMarkdown}
-//}
 
 //------------ END Объявление типов и глобальных переменных
 
@@ -143,7 +138,7 @@ func readfiletxt(namef string) string {
 	return string(bs)
 }
 
-// полчение текста поста блогна из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
+// полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
 func GetPostfromFile(namef string) Post {
 	str := readfiletxt(namef)
 
@@ -184,6 +179,20 @@ func indexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 func PostsHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
 }
 
+// посты блога
+func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
+	namefs := Getlistfileindirectory(pathhtmlts)
+	if len(namefs) != 0 {
+		for _, v := range namefs {
+			if v == params["namepage"] {
+				// ? сделать чтобы загружался страница из папки pathhtmlts
+				//				rr.HTML(200, "news")
+			}
+		}
+	}
+	rr.Redirect("/")
+}
+
 func main() {
 	m := martini.Classic()
 
@@ -192,7 +201,11 @@ func main() {
 	//	}
 
 	pathposts = "posts"
+	pathhtml = "html"
 	unescapeFuncMap := template.FuncMap{"unescape": unescape}
+
+	staticOptions := martini.StaticOptions{Prefix: "assets"}
+	m.Use(martini.Static("assets", staticOptions))
 
 	m.Use(render.Renderer(render.Options{
 		Directory:  "templates",                         // Specify what path to load the templates from.
@@ -205,6 +218,7 @@ func main() {
 	//	m.Use(auth.BasicFunc(authFunc))
 
 	m.Get("/", indexHandler)
+	m.Post("/html/:namepage", HtmlHandler)
 	//	m.Get("/posts"--как это было --может и ничего и не было., PostsHandler)
 	//	m.Post("/exec/:shop/:nstr", ExecHandler)
 	m.RunOnAddr(":1111")
