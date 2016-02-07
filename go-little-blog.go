@@ -181,7 +181,7 @@ func PostsHandler(rr render.Render, w http.ResponseWriter, r *http.Request, para
 
 // посты блога
 func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
-	namefs := Getlistfileindirectory(pathhtmlts)
+	namefs := Getlistfileindirectory(pathhtml)
 	if len(namefs) != 0 {
 		for _, v := range namefs {
 			if v == params["namepage"] {
@@ -194,7 +194,10 @@ func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 }
 
 func main() {
+	parports := "80"
 	m := martini.Classic()
+
+	//	martini.Env = martini.Prod
 
 	//	if !parse_args() {
 	//		return
@@ -215,19 +218,13 @@ func main() {
 		Funcs:      []template.FuncMap{unescapeFuncMap}, // Specify helper function maps for templates to access.
 		Extensions: []string{".tmpl", ".html"}}))
 
-	//	m.Use(auth.BasicFunc(authFunc))
-
 	m.Get("/", indexHandler)
 	m.Post("/html/:namepage", HtmlHandler)
 	//	m.Get("/posts"--как это было --может и ничего и не было., PostsHandler)
 	//	m.Post("/exec/:shop/:nstr", ExecHandler)
-	m.RunOnAddr(":1111")
+	m.RunOnAddr(":" + parports)
 
 }
-
-//func authFunc(username, password string) bool {
-//	return (auth.SecureCompare(username, "admin") && auth.SecureCompare(password, "!!!!VVjhsdsajdbabjd1")) || (auth.SecureCompare(username, "mars") && auth.SecureCompare(password, "Verbat1mert")) || (auth.SecureCompare(username, "oilnur") && auth.SecureCompare(password, "Verbat1mqwe"))
-//}
 
 //// функция парсинга аргументов программы
 //func parse_args() bool {
