@@ -46,8 +46,9 @@ type Post struct {
 type PagePost struct {
 	TitlePage string
 	Posts     []Post
-	postleft  int // кол-во сообщений влево , т.е. более поздние
-	postright int // кол-во сообщений вправо , т.е. более ранние
+	//	Teknumpost int
+	Postleft  int // кол-во сообщений влево , т.е. более поздние
+	Postright int // кол-во сообщений вправо , т.е. более ранние
 }
 
 func (p *Post) Print() {
@@ -177,7 +178,7 @@ func indexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 		p = append(p, Post{Id: "ПОСТОВ НЕТ", Title: "ЭТОТ БЛОГ ПУСТ. ПРИХОДИТЕ ПОЗЖЕ ;)", ContentText: ""})
 	}
 
-	rr.HTML(200, "index", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p})
+	rr.HTML(200, "index", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: kolpost})
 }
 
 // посты блога
@@ -201,22 +202,44 @@ func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 // посты блога
 func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
 	p := make([]Post, 0)
-	numpost, _ := strconv.Atoi(params["namepage"])
-	namefs := Getlistfileindirectory(pathhtml)
+	numpost, _ := strconv.Atoi(params["numpost"])
+	if numpost < 0 {
+		rr.Redirect("/")
+	}
+	namefs := Getlistfileindirectory(pathposts)
+	if numpost > len(namefs) {
+		numpost = numpost - kolpost
+		//		rr.HTML(200, "view", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: numpost + kolpost, Postleft: numpost - kolpost})
+		//		return
+	}
 	if len(namefs) != 0 {
-		for i := numpost; i < numpost+kolpost-1; i++ {
+		kpost := 0
+
+		if numpost+kolpost+1 > len(namefs) {
+			kpost = len(namefs)
+		} else {
+			kpost = numpost + kolpost
+		}
+
+		for i := numpost; i < kpost; i++ {
 			namef := strconv.Itoa(i) + ".md"
 			p = append(p, GetPostfromFile(pathposts+string(os.PathSeparator)+namef))
 		}
 	}
-	rr.HTML(200, "index", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p})
+	rr.HTML(200, "view", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: numpost + kolpost, Postleft: numpost - kolpost})
 }
 
 func main() {
-	parports := "1111"
+	parports := ""
 	m := martini.Classic()
 
 	//	martini.Env = martini.Prod
+
+	if martini.Env == martini.Prod {
+		parports = "80"
+	} else {
+		parports = "1111"
+	}
 
 	//	if !parse_args() {
 	//		return
@@ -239,8 +262,8 @@ func main() {
 		Extensions: []string{".tmpl", ".html"}}))
 
 	m.Get("/", indexHandler)
-	m.Post("/html/:namepage", HtmlHandler)
-	m.Post("/view/:numpost", ViewHandler)
+	m.Get("/html/:namepage", HtmlHandler)
+	m.Get("/view/:numpost", ViewHandler)
 	//	m.Get("/posts"--как это было --может и ничего и не было., PostsHandler)
 	//	m.Post("/exec/:shop/:nstr", ExecHandler)
 	m.RunOnAddr(":" + parports)
