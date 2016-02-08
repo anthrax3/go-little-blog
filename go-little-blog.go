@@ -212,12 +212,18 @@ func GetPostfromFile(namef string) Post {
 }
 
 func indexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
-	namefs := Getlistfileindirectory(pathposts)
-	vsegopost := len(namefs)
-	namefs = SorttoDown(namefs)
-	tnamefs := namefs[:kolpost]
 	p := make([]Post, 0)
+	namefs := Getlistfileindirectory(pathposts)
+	tnamefs := namefs
+	vsegopost := len(namefs)
 	if len(namefs) != 0 {
+		namefs = SorttoDown(namefs)
+		if kolpost > len(namefs) {
+			tnamefs = namefs[:]
+		} else {
+			tnamefs = namefs[:kolpost]
+		}
+
 		for _, namef := range tnamefs {
 			p = append(p, GetPostfromFile(pathposts+string(os.PathSeparator)+namef))
 		}
@@ -250,20 +256,22 @@ func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
 	p := make([]Post, 0)
 	numpost, _ := strconv.Atoi(params["numpost"])
-	if numpost <= 0 {
-		rr.Redirect("/")
-		return
-	}
-
 	namefs := Getlistfileindirectory(pathposts)
 	namefs = SorttoUp(namefs)
-	//	fmt.Println("отсортированные: ", namefs)
+	tnamefs := namefs
 	vsegopost := len(namefs)
 
+	if numpost <= 0 {
+		numpost = len(namefs)
+	}
+
 	if numpost >= len(namefs) {
-		//		numpost = vsegopost
-		tnamefs := namefs[len(namefs)-kolpost:]
-		//		p := make([]Post, 0)
+		if kolpost > len(namefs) {
+			tnamefs = namefs[:]
+		} else {
+			tnamefs = namefs[len(namefs)-kolpost:]
+		}
+
 		if len(namefs) != 0 {
 			for k := len(tnamefs) - 1; k >= 0; k-- {
 				namef := tnamefs[k]
@@ -332,8 +340,6 @@ func main() {
 	m.Get("/", indexHandler)
 	m.Get("/html/:namepage", HtmlHandler)
 	m.Get("/view/:numpost", ViewHandler)
-	//	m.Get("/posts"--как это было --может и ничего и не было., PostsHandler)
-	//	m.Post("/exec/:shop/:nstr", ExecHandler)
 	m.RunOnAddr(":" + parports)
 
 }
