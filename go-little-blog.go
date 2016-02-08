@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -71,6 +72,35 @@ func unescape(x string) interface{} {
 
 func ConvertMarkdownToHtml(markdown string) string {
 	return string(blackfriday.MarkdownBasic([]byte(markdown)))
+}
+
+// сортировка массива string
+func SorttoDown(s []string) []string {
+	for i := 0; i < len(s); i++ {
+		for j := i + 1; j < len(s); j++ {
+			s1, _ := strconv.Atoi(SplitFileName(s[i]))
+			s2, _ := strconv.Atoi(SplitFileName(s[j]))
+			if s1 < s2 {
+				tt := s[i]
+				s[i] = s[j]
+				s[j] = tt
+			}
+		}
+	}
+
+	return s
+}
+
+// выделение имени файла из строки
+func SplitFileName(s string) string {
+	_, sf := filepath.Split(s)
+	sfn := strings.Split(sf, ".")
+	if sfn != nil {
+		return sfn[0]
+	} else {
+		return ""
+	}
+
 }
 
 //возвращает список имен файлов в директории dirname
@@ -168,6 +198,9 @@ func indexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 
 	//	namef := ""
 	namefs := Getlistfileindirectory(pathposts)
+	//	fmt.Println("Не сортированное: ", namefs)
+	//	fmt.Println("Отсортированное: ", SorttoDown(namefs))
+	namefs = SorttoDown(namefs)
 	tnamefs := namefs[:kolpost]
 	p := make([]Post, 0)
 	if len(namefs) != 0 {
@@ -208,6 +241,7 @@ func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 	}
 
 	namefs := Getlistfileindirectory(pathposts)
+	namefs = SorttoDown(namefs)
 	if numpost > len(namefs) {
 		numpost = numpost - kolpost
 		//		rr.HTML(200, "view", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: numpost + kolpost, Postleft: numpost - kolpost})
