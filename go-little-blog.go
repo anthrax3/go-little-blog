@@ -91,6 +91,23 @@ func SorttoDown(s []string) []string {
 	return s
 }
 
+// сортировка массива string
+func SorttoUp(s []string) []string {
+	for i := 0; i < len(s); i++ {
+		for j := i + 1; j < len(s); j++ {
+			s1, _ := strconv.Atoi(SplitFileName(s[i]))
+			s2, _ := strconv.Atoi(SplitFileName(s[j]))
+			if s1 > s2 {
+				tt := s[i]
+				s[i] = s[j]
+				s[j] = tt
+			}
+		}
+	}
+
+	return s
+}
+
 // выделение имени файла из строки
 func SplitFileName(s string) string {
 	_, sf := filepath.Split(s)
@@ -195,11 +212,8 @@ func GetPostfromFile(namef string) Post {
 }
 
 func indexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
-
-	//	namef := ""
 	namefs := Getlistfileindirectory(pathposts)
-	//	fmt.Println("Не сортированное: ", namefs)
-	//	fmt.Println("Отсортированное: ", SorttoDown(namefs))
+	vsegopost := len(namefs)
 	namefs = SorttoDown(namefs)
 	tnamefs := namefs[:kolpost]
 	p := make([]Post, 0)
@@ -211,7 +225,7 @@ func indexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 		p = append(p, Post{Id: "ПОСТОВ НЕТ", Title: "ЭТОТ БЛОГ ПУСТ. ПРИХОДИТЕ ПОЗЖЕ ;)", ContentText: ""})
 	}
 
-	rr.HTML(200, "index", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: kolpost})
+	rr.HTML(200, "index", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: vsegopost - kolpost})
 }
 
 // посты блога
@@ -236,32 +250,51 @@ func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
 	p := make([]Post, 0)
 	numpost, _ := strconv.Atoi(params["numpost"])
-	if numpost < 0 {
+	if numpost <= 0 {
 		rr.Redirect("/")
+		return
 	}
 
 	namefs := Getlistfileindirectory(pathposts)
-	namefs = SorttoDown(namefs)
-	if numpost > len(namefs) {
-		numpost = numpost - kolpost
-		//		rr.HTML(200, "view", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: numpost + kolpost, Postleft: numpost - kolpost})
-		//		return
+	namefs = SorttoUp(namefs)
+	//	fmt.Println("отсортированные: ", namefs)
+	vsegopost := len(namefs)
+
+	if numpost >= len(namefs) {
+		//		numpost = vsegopost
+		tnamefs := namefs[len(namefs)-kolpost:]
+		//		p := make([]Post, 0)
+		if len(namefs) != 0 {
+			for k := len(tnamefs) - 1; k >= 0; k-- {
+				namef := tnamefs[k]
+				p = append(p, GetPostfromFile(pathposts+string(os.PathSeparator)+namef))
+			}
+		} else {
+			p = append(p, Post{Id: "ПОСТОВ НЕТ", Title: "ЭТОТ БЛОГ ПУСТ. ПРИХОДИТЕ ПОЗЖЕ ;)", ContentText: ""})
+		}
+		rr.HTML(200, "view", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: vsegopost - kolpost})
+		return
 	}
 	if len(namefs) != 0 {
-		kpost := 0
-
-		if numpost+kolpost+1 > len(namefs) {
-			kpost = len(namefs)
+		kk := numpost - kolpost
+		if kk <= 0 {
+			kk = 0
 		} else {
-			kpost = numpost + kolpost
+			kk = numpost - kolpost // - 1
 		}
+		tnamefs := namefs[kk:numpost]
 
-		for i := numpost; i < kpost; i++ {
-			namef := strconv.Itoa(i) + ".md"
-			p = append(p, GetPostfromFile(pathposts+string(os.PathSeparator)+namef))
+		if len(namefs) != 0 {
+			for k := len(tnamefs) - 1; k >= 0; k-- {
+				namef := tnamefs[k]
+				p = append(p, GetPostfromFile(pathposts+string(os.PathSeparator)+namef))
+			}
 		}
+	} else {
+		rr.Redirect("/")
+		return
 	}
-	rr.HTML(200, "view", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: numpost + kolpost, Postleft: numpost - kolpost})
+	rr.HTML(200, "view", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postleft: numpost + kolpost, Postright: numpost - kolpost})
 }
 
 func main() {
