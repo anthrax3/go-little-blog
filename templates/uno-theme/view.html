@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{{.TitlePage}}</title>
+	</head>
+	<body>
+		 <h1>{{.TitlePage}}</h1> <br><br>
+		
+		
+		<ol>
+		{{range $key,$value:=.Posts}}	
+  			<li>
+				<h3>Номер поста- {{$value.Id}}</h3>		
+				<h4>{{$value.Title | unescape}}</h4>		
+				<p>{{$value.ContentText | unescape }}</p>
+			</li>
+		{{end}}
+		</ol>		
+		<p><a href="/view/{{.Postleft}}">Более поздние...</a></p>
+		<p><a href="/view/{{.Postright}}">Более ранние...</a></p>
+			
+	</body>
+</html>

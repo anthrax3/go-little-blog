@@ -25,15 +25,11 @@ import (
 ////------------ Объявление типов и глобальных переменных
 
 var (
-	hd   string
-	user string
-)
-
-var (
-	pathposts string // папка в которой нах-ся посты блога
-	pathhtml  string // папка в которой нах-ся обычные html страницы блога
-	kolpost   int    // кол-во постов (сообщений) на главной странице блога
-	tekpost   int    // номер сообщения с которого начинается сообщения на странице
+	pathposts    string // папка в которой нах-ся посты блога
+	pathhtml     string // папка в которой нах-ся обычные html страницы блога
+	pathtemplate string //  папка в которой нах-ся шаблоны
+	kolpost      int    // кол-во постов (сообщений) на главной странице блога
+	tekpost      int    // номер сообщения с которого начинается сообщения на странице
 )
 
 // структура поста в блоге
@@ -47,7 +43,6 @@ type Post struct {
 type PagePost struct {
 	TitlePage string
 	Posts     []Post
-	//	Teknumpost int
 	Postleft  int // кол-во сообщений влево , т.е. более поздние
 	Postright int // кол-во сообщений вправо , т.е. более ранние
 }
@@ -320,17 +315,21 @@ func main() {
 	//	if !parse_args() {
 	//		return
 	//	}
-
+	//--------параметры программы------
 	pathposts = "posts"
 	pathhtml = "html"
-	kolpost = 3
+	//	pathtemplate = "templates"
+	pathtemplate = "templates\\uno-theme"
+	kolpost = 3 // кол-во постов которые видны на странице
+	//--------------
+
 	unescapeFuncMap := template.FuncMap{"unescape": unescape}
 
 	staticOptions := martini.StaticOptions{Prefix: "assets"}
 	m.Use(martini.Static("assets", staticOptions))
 
 	m.Use(render.Renderer(render.Options{
-		Directory:  "templates",                         // Specify what path to load the templates from.
+		Directory:  pathtemplate,                        // Specify what path to load the templates from.
 		Layout:     "layout",                            // Specify a layout template. Layouts can call {{ yield }} to render the current template.
 		Charset:    "UTF-8",                             // Sets encoding for json and html content-types. Default is "UTF-8".
 		IndentJSON: true,                                // Output human readable JSON
