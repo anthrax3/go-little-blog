@@ -1,24 +1,26 @@
-<!DOCTYPE html>
 
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>{{.TitlePage}}</title>
-	</head>
-	<body>
-		 <h1>{{.TitlePage}}</h1> <br><br>
-		
-		
-		<ol>
-		{{range $key,$value:=.Posts}}	
-  			<li>
-				<h3>Номер поста- {{$value.Id}}</h3>		
-				<h4>{{$value.Title | unescape}}</h4>		
-				<p>{{$value.ContentText | unescape }}</p>
-			</li>
-		{{end}}
-		</ol>
-		<p><a href="/view/{{.Postright}}">Более ранние...</a></p>
-			
-	</body>
-</html>
+<div class="row">
+
+  {{range $key,$value:=.Posts}}
+  <div class="4u 12u$(mobile)">
+    <article class="item">
+      <header>
+        <h3>{{$value.Title | unescape}} -    {{$value.Id}}</h3>
+      </header>
+      {{$value.ContentText | unescape }}
+    </article>
+  </div>
+  {{end}}
+
+
+  </div>
+
+  <div class="row">
+    <div class="4u 12u$(mobile)">
+      <p><b><a href="/"> В начало </a></b></p>
+    </div>
+
+    <div class="4u 12u$(mobile)">
+      <a href="/view/{{.Postright}}">Более ранние...</a>
+    </div>
+  </div>

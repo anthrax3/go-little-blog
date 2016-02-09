@@ -315,6 +315,7 @@ func main() {
 	//	if !parse_args() {
 	//		return
 	//	}
+
 	//--------параметры программы------
 	pathposts = "posts"
 	pathhtml = "html"
