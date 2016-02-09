@@ -320,7 +320,7 @@ func main() {
 	pathposts = "posts"
 	pathhtml = "html"
 	//	pathtemplate = "templates"
-	pathtemplate = "templates\\uno-theme"
+	pathtemplate = "templates" + string(os.PathSeparator) + "uno-theme"
 	kolpost = 3 // кол-во постов которые видны на странице
 	//--------------
 
