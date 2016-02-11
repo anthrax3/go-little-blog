@@ -300,6 +300,41 @@ func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 	rr.HTML(200, "view", &PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postleft: numpost + kolpost, Postright: numpost - kolpost})
 }
 
+// новый пост
+func (p *Post) New() {
+	p.Title = "новое сообщение"
+	p.ContentText = "пустое сообщение"
+}
+
+//сохранить пост в файл
+func (p *Post) SavetoFile(namef string) {
+	p.Title = "новое сообщение"
+	p.ContentText = "пустое сообщение"
+	str := p.Title + "\n" + p.ContentText + "\n"
+	Savestrtofile(namef, str)
+}
+
+func parseCmdArgs() bool {
+	res := false
+	var p Post
+	lenargs := len(os.Args)
+	if lenargs == 2 {
+		if os.Args[1] == "help" {
+			fmt.Println("new post -  create new post")
+			res = true
+		}
+	}
+	if lenargs == 3 { // два аргумента
+		if (os.Args[1] == "new") && (os.Args[2] == "post") {
+			fmt.Println("create new post in directory: ", pathposts)
+			p.New()
+			p.SavetoFile(pathposts + string(os.PathSeparator) + "newfile.md")
+			res = true
+		}
+	}
+	return res
+}
+
 func main() {
 	parports := ""
 	m := martini.Classic()
@@ -324,24 +359,28 @@ func main() {
 	kolpost = 3 // кол-во постов которые видны на странице
 	//--------------
 
-	unescapeFuncMap := template.FuncMap{"unescape": unescape}
+	if parseCmdArgs() {
+		return
+	} else {
 
-	staticOptions := martini.StaticOptions{Prefix: "assets"}
-	m.Use(martini.Static("assets", staticOptions))
+		unescapeFuncMap := template.FuncMap{"unescape": unescape}
 
-	m.Use(render.Renderer(render.Options{
-		Directory:  pathtemplate,                        // Specify what path to load the templates from.
-		Layout:     "layout",                            // Specify a layout template. Layouts can call {{ yield }} to render the current template.
-		Charset:    "UTF-8",                             // Sets encoding for json and html content-types. Default is "UTF-8".
-		IndentJSON: true,                                // Output human readable JSON
-		Funcs:      []template.FuncMap{unescapeFuncMap}, // Specify helper function maps for templates to access.
-		Extensions: []string{".tmpl", ".html"}}))
+		staticOptions := martini.StaticOptions{Prefix: "assets"}
+		m.Use(martini.Static("assets", staticOptions))
 
-	m.Get("/", indexHandler)
-	m.Get("/html/:namepage", HtmlHandler)
-	m.Get("/view/:numpost", ViewHandler)
-	m.RunOnAddr(":" + parports)
+		m.Use(render.Renderer(render.Options{
+			Directory:  pathtemplate,                        // Specify what path to load the templates from.
+			Layout:     "layout",                            // Specify a layout template. Layouts can call {{ yield }} to render the current template.
+			Charset:    "UTF-8",                             // Sets encoding for json and html content-types. Default is "UTF-8".
+			IndentJSON: true,                                // Output human readable JSON
+			Funcs:      []template.FuncMap{unescapeFuncMap}, // Specify helper function maps for templates to access.
+			Extensions: []string{".tmpl", ".html"}}))
 
+		m.Get("/", indexHandler)
+		m.Get("/html/:namepage", HtmlHandler)
+		m.Get("/view/:numpost", ViewHandler)
+		m.RunOnAddr(":" + parports)
+	}
 }
 
 //// функция парсинга аргументов программы
