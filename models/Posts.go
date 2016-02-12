@@ -3,6 +3,7 @@ package models
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"go-little-blog/utils"
@@ -61,6 +62,11 @@ func (p *Post) GetPostfromFile(namef string) {
 
 // полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
 func (p *Post) GetPostfromFileMd(namef string) {
+	var (
+		titleRegexp = regexp.MustCompile(`title:\s*\".+\"`)
+		//		dateRegexp   = regexp.MustCompile(`date:\s*\".+\"`)
+		//		descRegexp   = regexp.MustCompile(`description:\s*\".+\"`)
+	)
 	stitle := ""
 	scontent := ""
 	stitlepost := make([]string, 0)
@@ -88,6 +94,10 @@ func (p *Post) GetPostfromFileMd(namef string) {
 	for _, v := range stitlepost {
 		stitle += v + "\n"
 	}
+
+	stitle = titleRegexp.FindString(stitle)
+	//	dateRegexp.FindString(p.Title)
+	//	descRegexp.FindString(p.Title)
 
 	if (pospost+1 <= len(linestr)) && (pospost != -1) {
 		for j := pospost + 1; j < len(linestr); j++ {
