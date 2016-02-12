@@ -4,11 +4,7 @@ import (
 	//	"flag"
 	"fmt"
 	"html/template"
-	//	"net/http"
 	"os"
-	//	"path/filepath"
-	//	"strconv"
-	//	"strings"
 
 	"go-little-blog/models"
 	"go-little-blog/routes"
@@ -17,11 +13,6 @@ import (
 	"github.com/go-martini/martini"
 	//	"github.com/martini-contrib/auth"
 	"github.com/martini-contrib/render"
-
-	//	"image"
-	//	_ "image/gif"
-	//	"image/jpeg"
-	//	_ "image/png"
 )
 
 ////------------ Объявление типов и глобальных переменных
@@ -65,7 +56,7 @@ func main() {
 	if martini.Env == martini.Prod {
 		parports = "80"
 	} else {
-		parports = "1111"
+		parports = "1111 "
 	}
 
 	//	if !parse_args() {

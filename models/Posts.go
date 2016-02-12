@@ -26,9 +26,10 @@ var (
 
 // вывод на экран
 func (p *Post) Print() {
-	fmt.Println("Id post: ", p.Id)
-	fmt.Println("Title post: ", p.Title)
-	fmt.Println("ContentText post: ", p.ContentText)
+	fmt.Println("Id post: 			", p.Id)
+	fmt.Println("Date create post:  ", p.Date)
+	fmt.Println("Title post: 		", p.Title)
+	fmt.Println("ContentText post: 	", p.ContentText)
 }
 
 // новый пост
@@ -64,11 +65,12 @@ func (p *Post) GetPostfromFile(namef string) {
 func (p *Post) GetPostfromFileMd(namef string) {
 	var (
 		titleRegexp = regexp.MustCompile(`title:\s*\".+\"`)
-		//		dateRegexp   = regexp.MustCompile(`date:\s*\".+\"`)
+		dateRegexp  = regexp.MustCompile(`date:\s*\".+\"`)
 		//		descRegexp   = regexp.MustCompile(`description:\s*\".+\"`)
 	)
 	stitle := ""
 	scontent := ""
+	stitledate := ""
 	stitlepost := make([]string, 0)
 	pospost := -1
 	str := utils.Readfiletxt(namef)
@@ -95,7 +97,9 @@ func (p *Post) GetPostfromFileMd(namef string) {
 		stitle += v + "\n"
 	}
 
+	stitledate = dateRegexp.FindString(stitle)
 	stitle = titleRegexp.FindString(stitle)
+
 	//	dateRegexp.FindString(p.Title)
 	//	descRegexp.FindString(p.Title)
 
@@ -105,7 +109,7 @@ func (p *Post) GetPostfromFileMd(namef string) {
 		}
 	}
 
-	*p = Post{Id: namef, Title: stitle, ContentText: utils.ConvertMarkdownToHtml(scontent)}
+	*p = Post{Id: namef, Title: stitle, ContentText: utils.ConvertMarkdownToHtml(scontent), Date: stitledate}
 }
 
 //------------ END методы структуры Post

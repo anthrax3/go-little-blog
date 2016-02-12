@@ -48,6 +48,7 @@ func GetPostfromFile(namef string) models.Post {
 //-----------END вспомогательная функция которую надо будет удалить со временем
 
 func IndexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
+	var pp models.Post
 	p := make([]models.Post, 0)
 	namefs := utils.Getlistfileindirectory(Pathposts)
 	tnamefs := namefs
@@ -61,10 +62,8 @@ func IndexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, namef := range tnamefs {
-			p = append(p, GetPostfromFile(Pathposts+string(os.PathSeparator)+namef))
-			//			pp := new(Post)
-			//			pp.GetPostfromFile(Pathposts + string(os.PathSeparator) + namef)
-			//			p = append(p, Post{}.GetPostfromFile(Pathposts+string(os.PathSeparator)+namef))
+			pp.GetPostfromFileMd(Pathposts + string(os.PathSeparator) + namef)
+			p = append(p, pp)
 		}
 	} else {
 		p = append(p, models.Post{Id: "ПОСТОВ НЕТ", Title: "ЭТОТ БЛОГ ПУСТ. ПРИХОДИТЕ ПОЗЖЕ ;)", ContentText: ""})
