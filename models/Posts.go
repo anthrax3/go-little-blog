@@ -50,9 +50,22 @@ func (p *Post) GetPostfromFile(namef string) {
 			scontent = str[sposts+1:]
 		}
 	}
-	p = &Post{Id: namef, Title: utils.ConvertMarkdownToHtml(stitle), ContentText: utils.ConvertMarkdownToHtml(scontent)}
-	//	res := Post{Id: namef, Title: stitle, ContentText: scontent}
-	//	return res
+	*p = Post{Id: namef, Title: utils.ConvertMarkdownToHtml(stitle), ContentText: utils.ConvertMarkdownToHtml(scontent)}
+}
+
+// полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
+func (p *Post) GetPostfromFileMd(namef string) {
+	str := utils.Readfiletxt(namef)
+	sposts := strings.Index(str, "\n") // поиск первой строки - заголовка сообщения
+	stitle := ""
+	scontent := ""
+	if sposts != -1 {
+		stitle = str[0:sposts]
+		if sposts+1 <= len(str) {
+			scontent = str[sposts+1:]
+		}
+	}
+	*p = Post{Id: namef, Title: utils.ConvertMarkdownToHtml(stitle), ContentText: utils.ConvertMarkdownToHtml(scontent)}
 }
 
 //------------ END методы структуры Post
