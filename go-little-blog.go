@@ -48,6 +48,7 @@ func parseCmdArgs() bool {
 }
 
 func main() {
+	fmt.Println("Start...")
 	parports := ""
 	m := martini.Classic()
 

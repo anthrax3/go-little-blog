@@ -2,6 +2,7 @@
 package routes
 
 import (
+	//	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -63,6 +64,7 @@ func IndexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 
 		for _, namef := range tnamefs {
 			pp.GetPostfromFileMd(Pathposts + string(os.PathSeparator) + namef)
+			//			fmt.Println(pp)
 			p = append(p, pp)
 		}
 	} else {
@@ -92,6 +94,7 @@ func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 
 // просмотр посты блога
 func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
+	var pp models.Post
 	p := make([]models.Post, 0)
 	numpost, _ := strconv.Atoi(params["numpost"])
 	namefs := utils.Getlistfileindirectory(Pathposts)
@@ -113,7 +116,8 @@ func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 		if len(namefs) != 0 {
 			for k := len(tnamefs) - 1; k >= 0; k-- {
 				namef := tnamefs[k]
-				p = append(p, GetPostfromFile(Pathposts+string(os.PathSeparator)+namef))
+				pp.GetPostfromFileMd(Pathposts + string(os.PathSeparator) + namef)
+				p = append(p, pp)
 			}
 		} else {
 			p = append(p, models.Post{Id: "ПОСТОВ НЕТ", Title: "ЭТОТ БЛОГ ПУСТ. ПРИХОДИТЕ ПОЗЖЕ ;)", ContentText: ""})
@@ -133,7 +137,8 @@ func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 		if len(namefs) != 0 {
 			for k := len(tnamefs) - 1; k >= 0; k-- {
 				namef := tnamefs[k]
-				p = append(p, GetPostfromFile(Pathposts+string(os.PathSeparator)+namef))
+				pp.GetPostfromFileMd(Pathposts + string(os.PathSeparator) + namef)
+				p = append(p, pp)
 			}
 		}
 	} else {
