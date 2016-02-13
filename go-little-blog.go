@@ -56,7 +56,7 @@ func main() {
 	if martini.Env == martini.Prod {
 		parports = "80"
 	} else {
-		parports = "1111 "
+		parports = "1111"
 	}
 
 	//	if !parse_args() {
