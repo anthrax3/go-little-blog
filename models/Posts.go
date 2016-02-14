@@ -38,7 +38,7 @@ func (p *Post) New() {
 	p.ContentText = "пустое сообщение"
 }
 
-//сохранить пост в файл
+//сохранить пост в файл   - ПЕРЕДЕЛАТЬ, ДОБАВИТЬ ШАПКУ ПАРАМЕТРОВ title и  date
 func (p *Post) SavetoFile(namef string) {
 	p.Title = "новое сообщение"
 	p.ContentText = "пустое сообщение"
@@ -64,8 +64,9 @@ func (p *Post) GetPostfromFile(namef string) {
 // полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
 func (p *Post) GetPostfromFileMd(namef string) {
 	var (
-		titleRegexp = regexp.MustCompile(`title:\s*\".+\"`)
-		dateRegexp  = regexp.MustCompile(`date:\s*\".+\"`)
+		titleRegexp   = regexp.MustCompile(`title:\s*\".+\"`)
+		dateRegexp    = regexp.MustCompile(`date:\s*\".+\"`)
+		contentRegexp = regexp.MustCompile(`\".+\"`)
 		//		descRegexp   = regexp.MustCompile(`description:\s*\".+\"`)
 	)
 	stitle := ""
@@ -93,15 +94,18 @@ func (p *Post) GetPostfromFileMd(namef string) {
 		}
 	}
 
-	for _, v := range stitlepost {
-		stitle += v + "\n"
+	stitle = strings.Join(stitlepost, "\n")
+
+	stitledate = dateRegexp.FindString(stitle) // выделение параметра date
+	stitledate = contentRegexp.FindString(stitledate)
+	if len(stitledate) != 0 {
+		stitledate = stitledate[1 : len(stitledate)-1]
 	}
-
-	stitledate = dateRegexp.FindString(stitle)
-	stitle = titleRegexp.FindString(stitle)
-
-	//	dateRegexp.FindString(p.Title)
-	//	descRegexp.FindString(p.Title)
+	stitle = titleRegexp.FindString(stitle) // выделение параметра title
+	stitle = contentRegexp.FindString(stitle)
+	if len(stitle) != 0 {
+		stitle = stitle[1 : len(stitle)-1]
+	}
 
 	if (pospost+1 <= len(linestr)) && (pospost != -1) {
 		for j := pospost + 1; j < len(linestr); j++ {

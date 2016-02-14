@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
+	//	"strings"
 
 	"go-little-blog/models"
 	"go-little-blog/utils"
@@ -23,28 +23,6 @@ var (
 	Kolpost      int    // кол-во постов (сообщений) на главной странице блога
 	Tekpost      int    // номер сообщения с которого начинается сообщения на странице
 )
-
-//-----------вспомогательная функция которую надо будет удалить со временем
-// полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
-func GetPostfromFile(namef string) models.Post {
-	str := utils.Readfiletxt(namef)
-
-	sposts := strings.Index(str, "\n") // поиск первой строки - заголовка сообщения
-	stitle := ""
-	scontent := ""
-	if sposts != -1 {
-		stitle = str[0:sposts]
-		if sposts+1 <= len(str) {
-			scontent = str[sposts+1:]
-		}
-	}
-
-	//	fmt.Println(ConvertMarkdownToHtml(scontent))
-
-	res := models.Post{Id: namef, Title: utils.ConvertMarkdownToHtml(stitle), ContentText: utils.ConvertMarkdownToHtml(scontent)}
-	//	res := Post{Id: namef, Title: stitle, ContentText: scontent}
-	return res
-}
 
 //-----------END вспомогательная функция которую надо будет удалить со временем
 
@@ -64,7 +42,6 @@ func IndexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 
 		for _, namef := range tnamefs {
 			pp.GetPostfromFileMd(Pathposts + string(os.PathSeparator) + namef)
-			//			fmt.Println(pp)
 			p = append(p, pp)
 		}
 	} else {
