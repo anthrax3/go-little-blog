@@ -11,10 +11,11 @@ import (
 
 // структура поста в блоге
 type Post struct {
-	Id          string
-	Date        string // дата создания поста
-	Title       string
-	ContentText string
+	Id               string
+	Date             string // дата создания поста
+	Title            string
+	SmallContentText string // часть сообщения ContentText
+	ContentText      string // весь сообщение блога
 }
 
 var (
@@ -29,10 +30,11 @@ func (p *Post) Print() {
 	fmt.Println("Id post: 			", p.Id)
 	fmt.Println("Date create post:  ", p.Date)
 	fmt.Println("Title post: 		", p.Title)
+	fmt.Println("SmallContentText post: 	", p.SmallContentText)
 	fmt.Println("ContentText post: 	", p.ContentText)
 }
 
-// новый пост
+// новый пост - ПЕРЕДЕЛАТЬ, ДОБАВИТЬ ШАПКУ ПАРАМЕТРОВ title и  date
 func (p *Post) New() {
 	p.Title = "новое сообщение"
 	p.ContentText = "пустое сообщение"
@@ -47,21 +49,6 @@ func (p *Post) SavetoFile(namef string) {
 }
 
 // полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
-func (p *Post) GetPostfromFile(namef string) {
-	str := utils.Readfiletxt(namef)
-	sposts := strings.Index(str, "\n") // поиск первой строки - заголовка сообщения
-	stitle := ""
-	scontent := ""
-	if sposts != -1 {
-		stitle = str[0:sposts]
-		if sposts+1 <= len(str) {
-			scontent = str[sposts+1:]
-		}
-	}
-	*p = Post{Id: namef, Title: utils.ConvertMarkdownToHtml(stitle), ContentText: utils.ConvertMarkdownToHtml(scontent)}
-}
-
-// полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
 func (p *Post) GetPostfromFileMd(namef string) {
 	var (
 		titleRegexp   = regexp.MustCompile(`title:\s*\".+\"`)
@@ -71,6 +58,7 @@ func (p *Post) GetPostfromFileMd(namef string) {
 	)
 	stitle := ""
 	scontent := ""
+	smallcontent := ""
 	stitledate := ""
 	stitlepost := make([]string, 0)
 	pospost := -1
@@ -96,24 +84,30 @@ func (p *Post) GetPostfromFileMd(namef string) {
 
 	stitle = strings.Join(stitlepost, "\n")
 
-	stitledate = dateRegexp.FindString(stitle) // выделение параметра date
+	// выделение параметра date
+	stitledate = dateRegexp.FindString(stitle)
 	stitledate = contentRegexp.FindString(stitledate)
 	if len(stitledate) != 0 {
 		stitledate = stitledate[1 : len(stitledate)-1]
 	}
-	stitle = titleRegexp.FindString(stitle) // выделение параметра title
+	// выделение параметра title
+	stitle = titleRegexp.FindString(stitle)
 	stitle = contentRegexp.FindString(stitle)
 	if len(stitle) != 0 {
 		stitle = stitle[1 : len(stitle)-1]
 	}
 
 	if (pospost+1 <= len(linestr)) && (pospost != -1) {
-		for j := pospost + 1; j < len(linestr); j++ {
-			scontent += linestr[j] + "\n"
-		}
+		scontent = strings.Join(linestr[pospost+1:], "\n")
 	}
 
-	*p = Post{Id: namef, Title: stitle, ContentText: utils.ConvertMarkdownToHtml(scontent), Date: stitledate}
+	if (len(scontent) != 0) && (len(scontent) > 140) {
+		smallcontent = scontent[0:140]
+	} else {
+		smallcontent = scontent
+	}
+
+	*p = Post{Id: namef, Title: stitle, ContentText: utils.ConvertMarkdownToHtml(scontent), SmallContentText: utils.ConvertMarkdownToHtml(smallcontent), Date: stitledate}
 }
 
 //------------ END методы структуры Post
