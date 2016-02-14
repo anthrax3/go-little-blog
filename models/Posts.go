@@ -101,8 +101,10 @@ func (p *Post) GetPostfromFileMd(namef string) {
 		scontent = strings.Join(linestr[pospost+1:], "\n")
 	}
 
-	if (len(scontent) != 0) && (len(scontent) > 140) {
-		smallcontent = scontent[0:140]
+	//отсекаем 140 символами для краткого содержания поста
+	rscontent := []rune(scontent)
+	if (len(rscontent) != 0) && (len(rscontent) > 140) {
+		smallcontent = string(rscontent[0:140])
 	} else {
 		smallcontent = scontent
 	}
