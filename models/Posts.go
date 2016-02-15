@@ -34,17 +34,22 @@ func (p *Post) Print() {
 	fmt.Println("ContentText post: 	", p.ContentText)
 }
 
-// новый пост - ПЕРЕДЕЛАТЬ, ДОБАВИТЬ ШАПКУ ПАРАМЕТРОВ title и  date
+// новый пост - ПЕРЕДЕЛАТЬ, ДОБАВИТЬ ШАПКУ ПАРАМЕТРОВ  draft
 func (p *Post) New() {
-	p.Title = "новое сообщение"
-	p.ContentText = "пустое сообщение"
+	p.Id = ""
+	p.Title = "title newpost"
+	p.SmallContentText = "small content new post"
+	p.ContentText = "content new post"
+	p.Date = utils.GetNowDate()
+
 }
 
-//сохранить пост в файл   - ПЕРЕДЕЛАТЬ, ДОБАВИТЬ ШАПКУ ПАРАМЕТРОВ title и  date
+//сохранить пост в файл   - ПЕРЕДЕЛАТЬ, ДОБАВИТЬ ШАПКУ ПАРАМЕТРОВ draft
 func (p *Post) SavetoFile(namef string) {
-	p.Title = "новое сообщение"
-	p.ContentText = "пустое сообщение"
-	str := p.Title + "\n" + p.ContentText + "\n"
+	p.New()
+	stitle := "title: " + "\"" + p.Title + "\"" + "\n"
+	sdate := "date: " + "\"" + p.Date + "\"" + "\n"
+	str := beginTitlePost + "\n" + sdate + stitle + endTitlePost + "\n" + p.ContentText + "\n"
 	utils.Savestrtofile(namef, str)
 }
 

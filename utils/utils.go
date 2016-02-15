@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/russross/blackfriday"
 )
@@ -134,4 +135,9 @@ func Readfiletxt(namef string) string {
 		return "error here"
 	}
 	return string(bs)
+}
+
+// в виде строки текущая дата
+func GetNowDate() string {
+	return (time.Now().String())[:19]
 }
