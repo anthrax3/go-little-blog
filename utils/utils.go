@@ -141,3 +141,21 @@ func Readfiletxt(namef string) string {
 func GetNowDate() string {
 	return (time.Now().String())[:19]
 }
+
+//  преобразование bool в строку
+func Bool2String(b bool) string {
+	if b {
+		return "true"
+	} else {
+		return "false"
+	}
+}
+
+//  преобразование bool в строку
+func String2Bool(s string) bool {
+	if s == "true" {
+		return true
+	} else {
+		return false
+	}
+}

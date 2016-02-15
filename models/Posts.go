@@ -12,6 +12,7 @@ import (
 // структура поста в блоге
 type Post struct {
 	Id               string
+	Draft            bool   // true - черновик сообщения
 	Date             string // дата создания поста
 	Title            string
 	SmallContentText string // часть сообщения ContentText
@@ -25,18 +26,28 @@ var (
 
 //------------ методы структуры Post
 
+func (p *Post) SetDraft(b bool) {
+	p.Draft = b
+}
+
+func (p *Post) GetDraft() bool {
+	return p.Draft
+}
+
 // вывод на экран
 func (p *Post) Print() {
 	fmt.Println("Id post: 			", p.Id)
 	fmt.Println("Date create post:  ", p.Date)
+	fmt.Println("Draft create post:  ", p.Draft)
 	fmt.Println("Title post: 		", p.Title)
 	fmt.Println("SmallContentText post: 	", p.SmallContentText)
 	fmt.Println("ContentText post: 	", p.ContentText)
 }
 
-// новый пост - ПЕРЕДЕЛАТЬ, ДОБАВИТЬ ШАПКУ ПАРАМЕТРОВ  draft
+// новый пост
 func (p *Post) New() {
 	p.Id = ""
+	p.SetDraft(true) // черновик
 	p.Title = "title newpost"
 	p.SmallContentText = "small content new post"
 	p.ContentText = "content new post"
@@ -49,7 +60,8 @@ func (p *Post) SavetoFile(namef string) {
 	p.New()
 	stitle := "title: " + "\"" + p.Title + "\"" + "\n"
 	sdate := "date: " + "\"" + p.Date + "\"" + "\n"
-	str := beginTitlePost + "\n" + sdate + stitle + endTitlePost + "\n" + p.ContentText + "\n"
+	sdraft := "draft: " + "\"" + utils.Bool2String(p.Draft) + "\"" + "\n"
+	str := beginTitlePost + "\n" + sdate + stitle + sdraft + endTitlePost + "\n" + p.ContentText + "\n"
 	utils.Savestrtofile(namef, str)
 }
 
@@ -58,11 +70,13 @@ func (p *Post) GetPostfromFileMd(namef string) {
 	var (
 		titleRegexp   = regexp.MustCompile(`title:\s*\".+\"`)
 		dateRegexp    = regexp.MustCompile(`date:\s*\".+\"`)
+		draftRegexp   = regexp.MustCompile(`draft:\s*\".+\"`)
 		contentRegexp = regexp.MustCompile(`\".+\"`)
 		//		descRegexp   = regexp.MustCompile(`description:\s*\".+\"`)
 	)
 	stitle := ""
 	scontent := ""
+	sdraft := ""
 	smallcontent := ""
 	stitledate := ""
 	stitlepost := make([]string, 0)
@@ -95,6 +109,14 @@ func (p *Post) GetPostfromFileMd(namef string) {
 	if len(stitledate) != 0 {
 		stitledate = stitledate[1 : len(stitledate)-1]
 	}
+
+	// выделение параметра draft
+	sdraft = draftRegexp.FindString(stitle)
+	sdraft = contentRegexp.FindString(sdraft)
+	if len(sdraft) != 0 {
+		sdraft = sdraft[1 : len(sdraft)-1]
+	}
+
 	// выделение параметра title
 	stitle = titleRegexp.FindString(stitle)
 	stitle = contentRegexp.FindString(stitle)
@@ -114,7 +136,7 @@ func (p *Post) GetPostfromFileMd(namef string) {
 		smallcontent = scontent
 	}
 
-	*p = Post{Id: namef, Title: stitle, ContentText: utils.ConvertMarkdownToHtml(scontent), SmallContentText: utils.ConvertMarkdownToHtml(smallcontent), Date: stitledate}
+	*p = Post{Id: namef, Title: stitle, ContentText: utils.ConvertMarkdownToHtml(scontent), SmallContentText: utils.ConvertMarkdownToHtml(smallcontent), Date: stitledate, Draft: utils.String2Bool(sdraft)}
 }
 
 //------------ END методы структуры Post

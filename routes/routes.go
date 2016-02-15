@@ -42,7 +42,9 @@ func IndexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
 
 		for _, namef := range tnamefs {
 			pp.GetPostfromFileMd(Pathposts + string(os.PathSeparator) + namef)
-			p = append(p, pp)
+			if !pp.GetDraft() { // не отражаются черновики
+				p = append(p, pp)
+			}
 		}
 	} else {
 		p = append(p, models.Post{Id: "ПОСТОВ НЕТ", Title: "ЭТОТ БЛОГ ПУСТ. ПРИХОДИТЕ ПОЗЖЕ ;)", ContentText: ""})
