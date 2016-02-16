@@ -48,14 +48,14 @@ func (p *Post) Print() {
 func (p *Post) New() {
 	p.Id = ""
 	p.SetDraft(true) // черновик
-	p.Title = "title newpost"
-	p.SmallContentText = "small content new post"
-	p.ContentText = "content new post"
+	p.Title = ""
+	p.SmallContentText = ""
+	p.ContentText = ""
 	p.Date = utils.GetNowDate()
 
 }
 
-//сохранить пост в файл   - ПЕРЕДЕЛАТЬ, ДОБАВИТЬ ШАПКУ ПАРАМЕТРОВ draft
+//сохранить пост в файл
 func (p *Post) SavetoFile(namef string) {
 	p.New()
 	stitle := "title: " + "\"" + p.Title + "\"" + "\n"
@@ -137,6 +137,27 @@ func (p *Post) GetPostfromFileMd(namef string) {
 	}
 
 	*p = Post{Id: namef, Title: stitle, ContentText: utils.ConvertMarkdownToHtml(scontent), SmallContentText: utils.ConvertMarkdownToHtml(smallcontent), Date: stitledate, Draft: utils.String2Bool(sdraft)}
+}
+
+// возвращает сообщение не черновик, если нет нормальных сообщений то возращается -1, иначе возвращается текущий номер позиции
+func (p *Post) GetNormalPost(namefs []string, npos int) int {
+	//	var tekpos int = -1
+	if (npos < 0) || (npos >= len(namefs)) {
+		return -1
+	}
+	for npos < len(namefs) {
+		p.GetPostfromFileMd(namefs[npos])
+		if p.GetDraft() {
+			npos += 1
+		} else {
+			break
+		}
+	}
+	if p.GetDraft() {
+		return -1
+	} else {
+		return npos
+	}
 }
 
 //------------ END методы структуры Post

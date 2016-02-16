@@ -2,7 +2,7 @@
 package routes
 
 import (
-	//	"fmt"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -24,32 +24,95 @@ var (
 	Tekpost      int    // номер сообщения с которого начинается сообщения на странице
 )
 
+// получить сообщения из папки pathposts в кол-ве kolpost
+func GetPostsNew(pathposts string, kolpost int) ([]models.Post, int) {
+	var (
+		pp       models.Post
+		kolfiles int
+	)
+
+	p := make([]models.Post, 0)
+
+	namefs := utils.Getlistfileindirectory(pathposts)
+	namefs = utils.SorttoDown(namefs)
+	kolfiles = len(namefs)
+
+	tekkolpost := 0 // кол-во постов
+	tekpos := 0
+	for (tekpos != -1) && (tekpos < kolfiles) && (tekkolpost < kolpost) {
+		tekpos = pp.GetNormalPost(namefs, tekpos)
+		if tekpos != -1 {
+			p = append(p, pp)
+			tekpos += 1
+			tekkolpost += 1
+		}
+	}
+
+	return p, kolfiles
+}
+
+// получить сообщения из папки pathposts в кол-ве kolpost
+func getPosts(pathposts string, kolpost int) ([]models.Post, int) {
+	var (
+		//		tnamefs []string
+		//		pp       models.Post
+		kolfiles int
+	)
+
+	p := make([]models.Post, 0)
+
+	namefs := utils.Getlistfileindirectory(pathposts)
+	namefs = utils.SorttoDown(namefs)
+	kolfiles = len(namefs)
+
+	//	if (kolfiles != 0) && (kolpost != 0) {
+
+	//		if kolpost > len(namefs) {
+	//			tnamefs = namefs[:]
+	//			for npos, _ := range tnamefs {
+	//				if pp.GetNormalPost(tnamefs, npos) {
+	//					p = append(p, pp)
+	//				}
+	//			}
+
+	//		} else {
+	//			tnamefs = namefs[:kolpost]
+	//		}
+
+	//		for _, namef := range tnamefs {
+	//			pp.GetPostfromFileMd(Pathposts + string(os.PathSeparator) + namef)
+	//			if !pp.GetDraft() { // не отражаются черновики
+	//				p = append(p, pp)
+	//			} else {
+	//				kolpost += 1
+	//				if kolpost > len(namefs) {
+	//				}
+	//			}
+
+	//		}
+	//	} else {
+	//		pp.New()
+	//		pp.Title = "ЭТОТ БЛОГ ПУСТ. ПРИХОДИТЕ ПОЗЖЕ ;)"
+	//		p = append(p, pp)
+	//	}
+	return p, kolfiles
+}
+
 //-----------END вспомогательная функция которую надо будет удалить со временем
 
 func IndexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
-	var pp models.Post
-	p := make([]models.Post, 0)
-	namefs := utils.Getlistfileindirectory(Pathposts)
-	tnamefs := namefs
-	vsegopost := len(namefs)
-	if len(namefs) != 0 {
-		namefs = utils.SorttoDown(namefs)
-		if Kolpost > len(namefs) {
-			tnamefs = namefs[:]
-		} else {
-			tnamefs = namefs[:Kolpost]
-		}
+	//	var pp models.Post
+	//	p := make([]models.Post, 0)
+	fmt.Println(Pathposts)
+	p, vsegopost := GetPostsNew(Pathposts, Kolpost)
+	fmt.Println(len(p))
+	for _, v := range p {
+		fmt.Print(v)
+		//		fmt.Print(v.Id)
+		//		fmt.Print("  ", v.Draft)
+		//		fmt.Println("  ", v.SmallContentText)
 
-		for _, namef := range tnamefs {
-			pp.GetPostfromFileMd(Pathposts + string(os.PathSeparator) + namef)
-			if !pp.GetDraft() { // не отражаются черновики
-				p = append(p, pp)
-			}
-		}
-	} else {
-		p = append(p, models.Post{Id: "ПОСТОВ НЕТ", Title: "ЭТОТ БЛОГ ПУСТ. ПРИХОДИТЕ ПОЗЖЕ ;)", ContentText: ""})
 	}
-
 	rr.HTML(200, "index", &models.PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: vsegopost - Kolpost})
 }
 
