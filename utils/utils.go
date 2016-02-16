@@ -159,3 +159,12 @@ func String2Bool(s string) bool {
 		return false
 	}
 }
+
+//
+func ConcatPathFileName(namefs []string, pathstr string) []string {
+	for k, v := range namefs {
+		namefs[k] = pathstr + v
+	}
+	fmt.Println("")
+	return namefs
+}
