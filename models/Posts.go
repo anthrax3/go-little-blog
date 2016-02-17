@@ -3,6 +3,7 @@ package models
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
@@ -158,6 +159,40 @@ func (p *Post) GetNormalPost(namefs []string, npos int) int {
 	} else {
 		return npos
 	}
+}
+
+// получить сообщения из папки pathposts в кол-ве kolpost начиная с позиции tekpos
+func GetPostsNewPos(pathposts string, tekpos int, kolpost int) ([]Post, int) {
+	var (
+		pp       Post
+		kolfiles int
+	)
+
+	p := make([]Post, 0)
+
+	namefs := utils.Getlistfileindirectory(pathposts)
+	namefs = utils.SorttoDown(namefs)
+	namefs = utils.ConcatPathFileName(namefs, pathposts+string(os.PathSeparator))
+	kolfiles = len(namefs)
+	if tekpos < 0 {
+		tekpos = 0
+	}
+	if !(tekpos < kolfiles) {
+		tekpos = kolfiles - 1
+	}
+
+	tekkolpost := 0 // кол-во постов
+	//	tekpos := 0
+	for (tekpos != -1) && (tekpos < kolfiles) && (tekkolpost < kolpost) {
+		tekpos = pp.GetNormalPost(namefs, tekpos)
+		if tekpos != -1 {
+			p = append(p, pp)
+			tekpos += 1
+			tekkolpost += 1
+		}
+	}
+
+	return p, kolfiles
 }
 
 //------------ END методы структуры Post
