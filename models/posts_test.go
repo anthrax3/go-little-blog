@@ -29,6 +29,7 @@ func TestGetNormalPost(t *testing.T) {
 	if res != 1 {
 		t.Fatalf("должен быть res == 1  - ", res)
 	}
+	//	fmt.Println(p)
 	//----
 	p.New()
 	res = p.GetNormalPost(namefs, -1)

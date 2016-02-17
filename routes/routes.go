@@ -35,6 +35,7 @@ func GetPostsNew(pathposts string, kolpost int) ([]models.Post, int) {
 
 	namefs := utils.Getlistfileindirectory(pathposts)
 	namefs = utils.SorttoDown(namefs)
+	namefs = utils.ConcatPathFileName(namefs, pathposts+string(os.PathSeparator))
 	kolfiles = len(namefs)
 
 	tekkolpost := 0 // кол-во постов
