@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"regexp"
 
 	"go-little-blog/models"
 	"go-little-blog/routes"
@@ -45,6 +46,25 @@ func parseCmdArgs() bool {
 			res = true
 		}
 	}
+	return res
+}
+
+//парсинг конфиг файла map[ключ] значение_ключа
+func ParseCfgFile(namef string) map[string]string {
+	var (
+		pathpostsRegexp = regexp.MustCompile(`pathposts:.+`)
+		//		contentRegexp   = regexp.MustCompile(`\".+\"`)
+	)
+	res := make(map[string]string, 0)
+	str := utils.Readfiletxt(namef)
+
+	if len(str) == 0 {
+		return res
+	}
+
+	pathposts := pathpostsRegexp.FindString(str)
+	res["pathposts"] = pathposts
+
 	return res
 }
 
