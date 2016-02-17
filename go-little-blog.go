@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"os"
 	"regexp"
+	"strings"
 
 	"go-little-blog/models"
 	"go-little-blog/routes"
@@ -47,6 +48,18 @@ func parseCmdArgs() bool {
 		}
 	}
 	return res
+}
+
+// возвращает значение параметра params из строки str
+func GetParamsFromStr(params string, str string) string {
+	var val string = ""
+	pos := strings.Index(str, params+":")
+	if (pos == -1) && (len(params) == 0) {
+		return ""
+	}
+	val = strings.TrimLeft(strings.TrimRight(str[pos+len(params)+1:], " "), " ")
+	return val
+
 }
 
 //парсинг конфиг файла map[ключ] значение_ключа
