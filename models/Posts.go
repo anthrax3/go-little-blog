@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"go-little-blog/utils"
@@ -64,6 +65,28 @@ func (p *Post) SavetoFile(namef string) {
 	sdraft := "draft: " + "\"" + utils.Bool2String(p.Draft) + "\"" + "\n"
 	str := beginTitlePost + "\n" + sdate + stitle + sdraft + endTitlePost + "\n" + p.ContentText + "\n"
 	utils.Savestrtofile(namef, str)
+}
+
+//сохранить пост в файл c уникальным номером в имени файла, возвращает имени файла который создался
+func (p *Post) SavetoUniqFile(pathposts string) string {
+	var uniqname string
+	namefs := utils.Getlistfileindirectory(pathposts)
+	namefs = utils.SorttoDown(namefs)
+	kolfiles := len(namefs)
+	if kolfiles == 0 {
+		uniqname = "0"
+	} else {
+		numuniq, err := strconv.Atoi(utils.SplitFileName(namefs[0]))
+		if err != nil {
+			fmt.Println("Error in func SavetoUniqFile ", err)
+			uniqname = "0"
+		} else {
+			uniqname = strconv.Itoa(numuniq + 1)
+		}
+	}
+	uniqname = uniqname + ".md"
+	p.SavetoFile(pathposts + string(os.PathSeparator) + uniqname)
+	return uniqname
 }
 
 // полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение

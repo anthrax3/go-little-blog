@@ -38,9 +38,10 @@ func parseCmdArgs() bool {
 	}
 	if lenargs == 3 { // два аргумента
 		if (os.Args[1] == "new") && (os.Args[2] == "post") {
-			fmt.Println("create new post in directory: ", routes.Pathposts)
+
 			p.New()
-			p.SavetoFile(routes.Pathposts + string(os.PathSeparator) + "newfile.md")
+			//			p.SavetoFile(routes.Pathposts + string(os.PathSeparator) + "newfile.md")
+			fmt.Println("Result create new post : ", p.SavetoUniqFile(routes.Pathposts))
 			res = true
 		}
 	}
