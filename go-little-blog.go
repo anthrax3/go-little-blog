@@ -79,9 +79,21 @@ func main() {
 		routes.Kolpost = 3 // кол-во постов которые видны на странице
 	} else {
 		//"pathposts", "kolpost", "pathtemplate"
-		routes.Pathposts = rescfg["pathposts"]
-		routes.Pathhtml = "html"
-		routes.Pathtemplate = "templates" + string(os.PathSeparator) + rescfg["pathtemplate"]
+		if len(rescfg["pathposts"]) != 0 {
+			routes.Pathposts = rescfg["pathposts"]
+		} else {
+			routes.Pathposts = "posts"
+		}
+		if len(rescfg["pathhtml"]) != 0 {
+			routes.Pathhtml = rescfg["pathhtml"]
+		} else {
+			routes.Pathhtml = "html"
+		}
+		if len(rescfg["pathtemplate"]) != 0 {
+			routes.Pathtemplate = "templates" + string(os.PathSeparator) + rescfg["pathtemplate"]
+		} else {
+			routes.Pathtemplate = "templates" + string(os.PathSeparator) + "uno-theme"
+		}
 		tk, err := strconv.Atoi(rescfg["kolpost"])
 		if err != nil {
 			routes.Kolpost = 3
