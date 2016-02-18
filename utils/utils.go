@@ -165,6 +165,83 @@ func ConcatPathFileName(namefs []string, pathstr string) []string {
 	for k, v := range namefs {
 		namefs[k] = pathstr + v
 	}
-	fmt.Println("")
 	return namefs
+}
+
+//------------
+// возвращает значение параметра params из строки str
+func GetParamsFromStr(params string, str string) string {
+	var val string = ""
+	pos := strings.Index(str, params+":")
+	if (pos == -1) || (len(params) == 0) {
+		return ""
+	}
+	val = DelLeftSpace(DelRigthSpace(str[pos+len(params)+1:]))
+	return val
+}
+
+// возвращает
+func GetParamsFromList(params []string, liststr []string) map[string]string {
+	var r string
+	res := make(map[string]string)
+	for _, z := range params {
+		for _, v := range liststr {
+			r = GetParamsFromStr(z, v)
+			if r != "" {
+				res[z] = r
+				r = ""
+			}
+		}
+	}
+	return res
+}
+
+//парсинг конфиг файла map[ключ] значение_ключа
+func ParseCfgFile(params []string, namef string) map[string]string {
+	//	res := make(map[string]string, 0)
+	str := Readfiletxt(namef)
+	if len(str) == 0 {
+		return nil
+	}
+	liststr := strings.Split(str, "\n")
+	res := GetParamsFromList(params, liststr)
+	return res
+}
+
+//------------
+// удаление пробелов слева в строке s
+func DelLeftSpace(s string) string {
+	var res string = ""
+	pos := len(s)
+	if len(s) == 0 {
+		return s
+	}
+	for k, v := range s {
+		if v != ' ' {
+			pos = k
+			break
+		}
+	}
+	res = s[pos:]
+	return res
+}
+
+// удаление пробелов справа в строке s
+func DelRigthSpace(s string) string {
+	var res string = ""
+	res = ReverseStr(s)
+	res = DelLeftSpace(res)
+	res = ReverseStr(res)
+	return res
+}
+
+// реверс строки s
+func ReverseStr(s string) string {
+	res := make([]rune, 0)
+	ss := []rune(s)
+	for i := len(ss) - 1; i >= 0; i-- {
+		res = append(res, ss[i])
+	}
+
+	return string(res)
 }

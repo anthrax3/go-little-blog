@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"os"
-	"regexp"
-	"strings"
+	//	"regexp"
+	//	"strings"
+	"strconv"
 
 	"go-little-blog/models"
 	"go-little-blog/routes"
@@ -18,6 +19,8 @@ import (
 )
 
 ////------------ Объявление типов и глобальных переменных
+
+var params = []string{"pathposts", "kolpost", "pathtemplate"}
 
 // вывод на печать массива Post
 func Print(p []models.Post) {
@@ -50,37 +53,6 @@ func parseCmdArgs() bool {
 	return res
 }
 
-// возвращает значение параметра params из строки str
-func GetParamsFromStr(params string, str string) string {
-	var val string = ""
-	pos := strings.Index(str, params+":")
-	if (pos == -1) && (len(params) == 0) {
-		return ""
-	}
-	val = strings.TrimLeft(strings.TrimRight(str[pos+len(params)+1:], " "), " ")
-	return val
-
-}
-
-//парсинг конфиг файла map[ключ] значение_ключа
-func ParseCfgFile(namef string) map[string]string {
-	var (
-		pathpostsRegexp = regexp.MustCompile(`pathposts:.+`)
-		//		contentRegexp   = regexp.MustCompile(`\".+\"`)
-	)
-	res := make(map[string]string, 0)
-	str := utils.Readfiletxt(namef)
-
-	if len(str) == 0 {
-		return res
-	}
-
-	pathposts := pathpostsRegexp.FindString(str)
-	res["pathposts"] = pathposts
-
-	return res
-}
-
 func main() {
 	fmt.Println("Start...")
 	parports := ""
@@ -99,11 +71,26 @@ func main() {
 	//	}
 
 	//--------параметры программы------
-	routes.Pathposts = "posts"
-	routes.Pathhtml = "html"
-	//	routes.Pathtemplate = "templates"
-	routes.Pathtemplate = "templates" + string(os.PathSeparator) + "uno-theme"
-	routes.Kolpost = 3 // кол-во постов которые видны на странице
+	rescfg := utils.ParseCfgFile(params, "config.cfg")
+	if len(rescfg) != 0 {
+		routes.Pathposts = "posts"
+		routes.Pathhtml = "html"
+		routes.Pathtemplate = "templates" + string(os.PathSeparator) + "uno-theme"
+		routes.Kolpost = 3 // кол-во постов которые видны на странице
+	} else {
+		//"pathposts", "kolpost", "pathtemplate"
+		routes.Pathposts = rescfg["pathposts"]
+		routes.Pathhtml = "html"
+		routes.Pathtemplate = "templates" + string(os.PathSeparator) + rescfg["pathtemplate"]
+		tk, err := strconv.Atoi(rescfg["kolpost"])
+		if err != nil {
+			routes.Kolpost = 3
+		} else {
+			routes.Kolpost = tk
+		}
+		// кол-во постов которые видны на странице
+	}
+	fmt.Println(len(routes.Pathposts))
 	//--------------
 
 	if parseCmdArgs() {
