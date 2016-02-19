@@ -1,6 +1,8 @@
 package utils
 
 import (
+	//	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -129,6 +131,102 @@ func TestReverseStr(t *testing.T) {
 	s = ""
 	res = ReverseStr(s)
 	if res != "" {
+		t.Fatalf("неправильный результат ", res)
+	}
+
+}
+
+//сравнение двух массивов строк s1 и s2, возвр-ет true - если s1 и s2 идентичны  -  t-
+//func EqStrArray(s1 []string, s2 []string) bool {
+func TestEqStrArray(t *testing.T) {
+	s1 := []string{"10", "7", "8", "4", "0"}
+	s2 := []string{"0", "4", "7", "8", "10"}
+	res := EqStrArray(s1, s2)
+	if res {
+		t.Fatalf("неправильный результат ", res)
+	}
+
+	res = EqStrArray(s1, s1)
+	if !res {
+		t.Fatalf("неправильный результат ", res)
+	}
+
+	s3 := make([]string, 0)
+	res = EqStrArray(s1, s3)
+	if res {
+		t.Fatalf("неправильный результат ", res)
+	}
+
+	res = EqStrArray(s3, s3)
+	if !res {
+		t.Fatalf("неправильный результат ", res)
+	}
+}
+
+// сортировка массива string содержащих цифры
+//func SorttoUp(s []string) []string {
+func TestSorttoUp(t *testing.T) {
+	s := []string{"10", "7", "8", "4", "0"}
+	sres := []string{"0", "4", "7", "8", "10"}
+	res := SorttoUp(s)
+	if !EqStrArray(res, sres) {
+		t.Fatalf("неправильный результат ", res)
+	}
+
+	s = []string{"ф", "7", "8", "4", "0"}
+	sres = []string{"ф", "0", "4", "7", "8"}
+	res = SorttoUp(s)
+	if !EqStrArray(res, sres) {
+		t.Fatalf("неправильный результат ", res)
+	}
+}
+
+// сортировка массива string содержащих цифры по убыванию
+//func SorttoDown(s []string) []string {
+func TestSorttoDown(t *testing.T) {
+	s := []string{"10", "7", "8", "4", "0"}
+	sres := []string{"10", "8", "7", "4", "0"}
+	res := SorttoDown(s)
+	if !EqStrArray(res, sres) {
+		t.Fatalf("неправильный результат ", res)
+	}
+
+	//	s = []string{"ф", "7", "8", "4", "0"}
+	//	sres = []string{"ф", "8", "7", "4", "0"}
+	//	res = SorttoDown(s)
+	//	if !EqStrArray(res, sres) {
+	//		t.Fatalf("неправильный результат ", res)
+	//	}
+}
+
+// выделение имени файла из строки
+//func SplitFileName(s string) string {
+func TestSplitFileName(t *testing.T) {
+	s := "filename1.txt"
+	sres := "filename1"
+	res := SplitFileName(s)
+	if strings.Compare(res, sres) != 0 {
+		t.Fatalf("неправильный результат ", res)
+	}
+
+	s = "привет1.txt"
+	sres = "привет1"
+	res = SplitFileName(s)
+	if strings.Compare(res, sres) != 0 {
+		t.Fatalf("неправильный результат ", res)
+	}
+
+	s = ""
+	sres = ""
+	res = SplitFileName(s)
+	if strings.Compare(res, sres) != 0 {
+		t.Fatalf("неправильный результат ", res)
+	}
+
+	s = "c:\\dir\\filename1.txt"
+	sres = "filename1"
+	res = SplitFileName(s)
+	if strings.Compare(res, sres) != 0 {
 		t.Fatalf("неправильный результат ", res)
 	}
 

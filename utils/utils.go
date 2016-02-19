@@ -21,7 +21,21 @@ func ConvertMarkdownToHtml(markdown string) string {
 	return string(blackfriday.MarkdownBasic([]byte(markdown)))
 }
 
-// сортировка массива string
+//сравнение двух массивов строк s1 и s2, возвр-ет true - если s1 и s2 идентичны  -  t+
+func EqStrArray(s1 []string, s2 []string) bool {
+	//	f := true
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := 0; i < len(s1); i++ {
+		if strings.Compare(s1[i], s2[i]) != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+// сортировка массива string содержащих цифры по возрастанию - t+
 func SorttoUp(s []string) []string {
 	for i := 0; i < len(s); i++ {
 		for j := i + 1; j < len(s); j++ {
@@ -38,7 +52,7 @@ func SorttoUp(s []string) []string {
 	return s
 }
 
-// сортировка массива string
+// сортировка массива string содержащих цифры по убыванию  -  t+
 func SorttoDown(s []string) []string {
 	for i := 0; i < len(s); i++ {
 		for j := i + 1; j < len(s); j++ {
@@ -55,7 +69,7 @@ func SorttoDown(s []string) []string {
 	return s
 }
 
-// выделение имени файла из строки
+// выделение имени файла из строки   t+
 func SplitFileName(s string) string {
 	_, sf := filepath.Split(s)
 	sfn := strings.Split(sf, ".")
@@ -64,7 +78,6 @@ func SplitFileName(s string) string {
 	} else {
 		return ""
 	}
-
 }
 
 //возвращает список имен файлов в директории dirname
@@ -169,7 +182,7 @@ func ConcatPathFileName(namefs []string, pathstr string) []string {
 }
 
 //------------
-// возвращает значение параметра params из строки str
+// возвращает значение параметра params из строки str  - t+
 func GetParamsFromStr(params string, str string) string {
 	var val string = ""
 	pos := strings.Index(str, params+":")
@@ -180,7 +193,7 @@ func GetParamsFromStr(params string, str string) string {
 	return val
 }
 
-// возвращает
+// возвращает  - t+
 func GetParamsFromList(params []string, liststr []string) map[string]string {
 	var r string
 	res := make(map[string]string)
@@ -196,7 +209,7 @@ func GetParamsFromList(params []string, liststr []string) map[string]string {
 	return res
 }
 
-//парсинг конфиг файла map[ключ] значение_ключа
+//парсинг конфиг файла map[ключ] значение_ключа  - t+
 func ParseCfgFile(params []string, namef string) map[string]string {
 	//	res := make(map[string]string, 0)
 	str := Readfiletxt(namef)
@@ -209,7 +222,7 @@ func ParseCfgFile(params []string, namef string) map[string]string {
 }
 
 //------------
-// удаление пробелов слева в строке s
+// удаление пробелов слева в строке s  - t+
 func DelLeftSpace(s string) string {
 	var res string = ""
 	pos := len(s)
@@ -226,7 +239,7 @@ func DelLeftSpace(s string) string {
 	return res
 }
 
-// удаление пробелов справа в строке s
+// удаление пробелов справа в строке s   -  t+
 func DelRigthSpace(s string) string {
 	var res string = ""
 	res = ReverseStr(s)
@@ -235,7 +248,7 @@ func DelRigthSpace(s string) string {
 	return res
 }
 
-// реверс строки s
+// реверс строки s   - t+
 func ReverseStr(s string) string {
 	res := make([]rune, 0)
 	ss := []rune(s)

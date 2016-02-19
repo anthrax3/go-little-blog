@@ -127,17 +127,3 @@ func main() {
 		m.RunOnAddr(":" + parports)
 	}
 }
-
-//// функция парсинга аргументов программы
-//func parse_args() bool {
-//	flag.StringVar(&hd, "hd", "", "Рабочая папка где нах-ся папки пользователей для сохранения ")
-//	flag.StringVar(&user, "user", "", "Рабочая папка где нах-ся папки пользователей для сохранения ")
-//	flag.Parse()
-//	pathcfg = hd
-//	if user == "" {
-//		tekuser = "testuser"
-//	} else {
-//		tekuser = user
-//	}
-//	return true
-//}
