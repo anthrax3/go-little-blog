@@ -2,7 +2,7 @@
 package models
 
 import (
-	//	"fmt"
+	"fmt"
 	"os"
 	"testing"
 
@@ -22,17 +22,21 @@ func TestGetNormalPost(t *testing.T) {
 	namefsnull = utils.ConcatPathFileName(namefsnull, pathtestpostmd)
 	//----
 	p.New()
-	res := p.GetNormalPost(namefs, 0)
+	res, koldraft := p.GetNormalPost(namefs, 0)
+	fmt.Println("koldraft", koldraft)
 	if p.Id != pathtestpostmd+"6.md" {
 		t.Fatalf("должен быть p.Id - "+pathtestpostmd+"6.md", p.Id)
 	}
 	if res != 1 {
 		t.Fatalf("должен быть res == 1  - ", res)
 	}
-	//	fmt.Println(p)
+	if koldraft != 1 {
+		t.Fatalf("неправильный результат  - ", koldraft)
+	}
+
 	//----
 	p.New()
-	res = p.GetNormalPost(namefs, -1)
+	res, koldraft = p.GetNormalPost(namefs, -1)
 	if p.Id != "" {
 		t.Fatalf("должен быть p.Id пустой - ", p.Id)
 	}
@@ -41,7 +45,7 @@ func TestGetNormalPost(t *testing.T) {
 	}
 	//----
 	p.New()
-	res = p.GetNormalPost(namefsnull, 0)
+	res, koldraft = p.GetNormalPost(namefsnull, 0)
 	if p.Id != "" {
 		t.Fatalf("должен быть p.Id пустой - ", p.Id)
 	}
@@ -50,7 +54,7 @@ func TestGetNormalPost(t *testing.T) {
 	}
 	//----
 	p.New()
-	res = p.GetNormalPost(namefs, 1)
+	res, koldraft = p.GetNormalPost(namefs, 1)
 	if p.Id != pathtestpostmd+"6.md" {
 		t.Fatalf("должен быть p.Id - "+pathtestpostmd+"6.md", p.Id)
 	}
@@ -59,7 +63,7 @@ func TestGetNormalPost(t *testing.T) {
 	}
 	//----
 	p.New()
-	res = p.GetNormalPost(namefs, 3)
+	res, koldraft = p.GetNormalPost(namefs, 3)
 	if p.Id != "" {
 		t.Fatalf("должен быть p.Id пустой - ", p.Id)
 	}
@@ -75,7 +79,7 @@ func TestGetPostsNewPos(t *testing.T) {
 		kolpost   int    = 3
 	)
 
-	resposts, _ := GetPostsNewPos(pathposts, 0, kolpost)
+	resposts, _, _ := GetPostsNewPos(pathposts, 0, kolpost)
 
 	//	if kolfiles != 8 {
 	//		t.Fatalf("должен быть kolfiles == 8  - ", kolfiles)
@@ -88,7 +92,7 @@ func TestGetPostsNewPos(t *testing.T) {
 		t.Fatalf("SmallContentText должен быть не пустой - ", resposts[0].SmallContentText+" -- "+resposts[1].SmallContentText+" -- "+resposts[2].SmallContentText+" -- ")
 	}
 	//----
-	resposts, _ = GetPostsNewPos(pathposts, -1, kolpost)
+	resposts, _, _ = GetPostsNewPos(pathposts, -1, kolpost)
 
 	//	if kolfiles != 8 {
 	//		t.Fatalf("должен быть kolfiles == 8  - ", kolfiles)

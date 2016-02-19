@@ -89,14 +89,13 @@ func (p *Post) SavetoUniqFile(pathposts string) string {
 	return uniqname
 }
 
-// полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение
+// полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение - возвращает кол-во черновых сообщений (draft=true)
 func (p *Post) GetPostfromFileMd(namef string) {
 	var (
 		titleRegexp   = regexp.MustCompile(`title:\s*\".+\"`)
 		dateRegexp    = regexp.MustCompile(`date:\s*\".+\"`)
 		draftRegexp   = regexp.MustCompile(`draft:\s*\".+\"`)
 		contentRegexp = regexp.MustCompile(`\".+\"`)
-		//		descRegexp   = regexp.MustCompile(`description:\s*\".+\"`)
 	)
 	stitle := ""
 	scontent := ""
@@ -161,38 +160,43 @@ func (p *Post) GetPostfromFileMd(namef string) {
 	}
 
 	*p = Post{Id: namef, Title: stitle, ContentText: utils.ConvertMarkdownToHtml(scontent), SmallContentText: utils.ConvertMarkdownToHtml(smallcontent), Date: stitledate, Draft: utils.String2Bool(sdraft)}
+
 }
 
 // возвращает сообщение не черновик, если нет нормальных сообщений то возращается -1, иначе возвращается текущий номер позиции
-func (p *Post) GetNormalPost(namefs []string, npos int) int {
-	//	var tekpos int = -1
+func (p *Post) GetNormalPost(namefs []string, npos int) (int, int) {
+	var koldraft int
 	if (npos < 0) || (npos >= len(namefs)) {
-		return -1
+		return -1, 0
 	}
+	koldraft = 0
 	for npos < len(namefs) {
 		p.GetPostfromFileMd(namefs[npos])
 		if p.GetDraft() {
 			npos += 1
+			koldraft += 1
 		} else {
 			break
 		}
 	}
 	if p.GetDraft() {
-		return -1
+		return -1, 0
 	} else {
-		return npos
+		return npos, koldraft
 	}
 }
 
-// получить сообщения из папки pathposts в кол-ве kolpost начиная с позиции tekpos
-func GetPostsNewPos(pathposts string, tekpos int, kolpost int) ([]Post, int) {
+// получить сообщения из папки pathposts в кол-ве kolpost начиная с позиции tekpos - возвр-ет массив  []Post,кол-во файлов в папке, кол-во черновых сообщений
+func GetPostsNewPos(pathposts string, tekpos int, kolpost int) ([]Post, int, int) {
 	var (
 		pp       Post
 		kolfiles int
+		koldraft int = 0
+		kd       int
 	)
 
 	p := make([]Post, 0)
-
+	koldraft = 0
 	namefs := utils.Getlistfileindirectory(pathposts)
 	namefs = utils.SorttoDown(namefs)
 	namefs = utils.ConcatPathFileName(namefs, pathposts+string(os.PathSeparator))
@@ -205,17 +209,17 @@ func GetPostsNewPos(pathposts string, tekpos int, kolpost int) ([]Post, int) {
 	}
 
 	tekkolpost := 0 // кол-во постов
-	//	tekpos := 0
 	for (tekpos != -1) && (tekpos < kolfiles) && (tekkolpost < kolpost) {
-		tekpos = pp.GetNormalPost(namefs, tekpos)
+		tekpos, kd = pp.GetNormalPost(namefs, tekpos)
 		if tekpos != -1 {
 			p = append(p, pp)
 			tekpos += 1
 			tekkolpost += 1
+			koldraft += kd
 		}
 	}
 
-	return p, kolfiles
+	return p, kolfiles, koldraft
 }
 
 //------------ END методы структуры Post

@@ -2,7 +2,7 @@
 package routes
 
 import (
-	//	"fmt"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,8 +25,9 @@ var (
 //-----------END вспомогательная функция которую надо будет удалить со временем
 
 func IndexHandler(rr render.Render, w http.ResponseWriter, r *http.Request) {
-	p, vsegopost := models.GetPostsNewPos(Pathposts, 0, Kolpost)
-	rr.HTML(200, "index", &models.PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: vsegopost - Kolpost})
+	p, vsegopost, koldraft := models.GetPostsNewPos(Pathposts, 0, Kolpost)
+	fmt.Println("koldraft= ", koldraft)
+	rr.HTML(200, "index", &models.PagePost{TitlePage: "Блог проектов kaefik", Posts: p, Postright: vsegopost - Kolpost - koldraft})
 }
 
 // посты блога
@@ -49,11 +50,9 @@ func HtmlHandler(rr render.Render, w http.ResponseWriter, r *http.Request, param
 
 // просмотр посты блога
 func ViewHandler(rr render.Render, w http.ResponseWriter, r *http.Request, params martini.Params) {
-	//	var pp models.Post
-	//	p := make([]models.Post, 0)
 	numpost, _ := strconv.Atoi(params["numpost"])
 
-	p, kolfiles := models.GetPostsNewPos(Pathposts, numpost, Kolpost)
+	p, kolfiles, koldraft := models.GetPostsNewPos(Pathposts, numpost, Kolpost)
 
 	if kolfiles == 0 {
 		rr.Redirect("/")
