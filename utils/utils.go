@@ -80,7 +80,9 @@ func SplitFileName(s string) string {
 	}
 }
 
-//возвращает список имен файлов в директории dirname
+//-----------функции для работы с файлами и каталогами
+
+//возвращает список имен файлов в директории dirname  -    t-
 func Getlistfileindirectory(dirname string) []string {
 	listfile := make([]string, 0)
 	d, err := os.Open(dirname)
@@ -150,12 +152,14 @@ func Readfiletxt(namef string) string {
 	return string(bs)
 }
 
+//-----------END функции для работы с файлами и каталогами
+
 // в виде строки текущая дата
 func GetNowDate() string {
 	return (time.Now().String())[:19]
 }
 
-//  преобразование bool в строку
+//  преобразование bool в строку -  t+
 func Bool2String(b bool) string {
 	if b {
 		return "true"
@@ -164,7 +168,7 @@ func Bool2String(b bool) string {
 	}
 }
 
-//  преобразование bool в строку
+//  преобразование bool в строку  - t+
 func String2Bool(s string) bool {
 	if s == "true" {
 		return true
@@ -173,7 +177,7 @@ func String2Bool(s string) bool {
 	}
 }
 
-//
+// t+
 func ConcatPathFileName(namefs []string, pathstr string) []string {
 	for k, v := range namefs {
 		namefs[k] = pathstr + v
@@ -257,4 +261,8 @@ func ReverseStr(s string) string {
 	}
 
 	return string(res)
+}
+
+func isWindows() bool {
+	return os.PathSeparator == '\\' && os.PathListSeparator == ';'
 }

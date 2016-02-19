@@ -223,11 +223,59 @@ func TestSplitFileName(t *testing.T) {
 		t.Fatalf("неправильный результат ", res)
 	}
 
-	s = "c:\\dir\\filename1.txt"
-	sres = "filename1"
-	res = SplitFileName(s)
-	if strings.Compare(res, sres) != 0 {
-		t.Fatalf("неправильный результат ", res)
+	if isWindows() {
+		s = "c:\\dir\\filename1.txt"
+		sres = "filename1"
+		res = SplitFileName(s)
+		if strings.Compare(res, sres) != 0 {
+			t.Fatalf("неправильный результат ", res)
+		}
+	} else {
+		s = "/usr/local/filename1.txt"
+		sres = "filename1"
+		res = SplitFileName(s)
+		if strings.Compare(res, sres) != 0 {
+			t.Fatalf("неправильный результат ", res)
+		}
 	}
 
+}
+
+//  преобразование bool в строку -
+//func Bool2String(b bool) string {
+func TestBool2String(t *testing.T) {
+	if Bool2String(true) != "true" {
+		t.Fatalf("неправильный результат ", Bool2String(true))
+	}
+	if Bool2String(false) != "false" {
+		t.Fatalf("неправильный результат ", Bool2String(false))
+	}
+}
+
+//  преобразование bool в строку
+//func String2Bool(s string) bool {
+func TestString2Bool(t *testing.T) {
+	res := String2Bool("true")
+	if !res {
+		t.Fatalf("неправильный результат ", res)
+	}
+	res = String2Bool("false")
+	if res {
+		t.Fatalf("неправильный результат ", res)
+	}
+	res = String2Bool("")
+	if res {
+		t.Fatalf("неправильный результат ", res)
+	}
+}
+
+//func ConcatPathFileName(namefs []string, pathstr string) []string {
+func TestConcatPathFileName(t *testing.T) {
+	namefs := []string{"abc", "ilnur"}
+	resnamef := []string{"utils-abc", "utils-ilnur"}
+	pathstr := "utils-"
+	res := ConcatPathFileName(namefs, pathstr)
+	if !EqStrArray(namefs, resnamef) {
+		t.Fatalf("неправильный результат ", res)
+	}
 }
