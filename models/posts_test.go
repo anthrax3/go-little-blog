@@ -4,6 +4,7 @@ package models
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"go-little-blog/utils"
@@ -107,8 +108,60 @@ func TestGetPostsNewPos(t *testing.T) {
 }
 
 func TestSavetoUniqFile(t *testing.T) {
-	var p Post
-	p.New()
-	p.SavetoUniqFile("test-postmd")
+	//	var p Post
+	//	p.New()
+	//	p.SavetoUniqFile("test-postmd")
 
+}
+
+//func (p *Post) GetPostfromFileMd(namef string) {
+func TestGetPostfromFileMd(t *testing.T) {
+	var (
+		p         Post
+		pathposts string = "test-postmd"
+	)
+
+	p.GetPostfromFileMd(pathposts + string(os.PathSeparator) + "4.md")
+
+	if strings.Compare(p.ContentText, utils.ConvertMarkdownToHtml("for test posts")) != 0 {
+		p.Print()
+		t.Fatalf("неправильный результат")
+	}
+	if p.Draft {
+		t.Fatalf("неправильный результат", p.Draft)
+	}
+	if strings.Compare(p.Date, "2016-02-01") != 0 {
+		t.Fatalf("неправильный результат", p.Date)
+	}
+	//
+	if strings.Compare(p.Title, "4 posts Темы нету.") != 0 {
+		t.Fatalf("неправильный результат", p.Title)
+	}
+	if strings.Compare(p.Id, pathposts+string(os.PathSeparator)+"4.md") != 0 {
+		t.Fatalf("неправильный результат", p.Title)
+	}
+	// проверка на открытие несуществующего файла
+	p.GetPostfromFileMd(pathposts + string(os.PathSeparator) + "1114.md")
+	if strings.Compare(p.ContentText, utils.ConvertMarkdownToHtml("")) != 0 {
+		p.Print()
+		t.Fatalf("неправильный результат")
+	}
+	if p.Draft {
+		t.Fatalf("неправильный результат", p.Draft)
+	}
+	if strings.Compare(p.Date, "") != 0 {
+		t.Fatalf("неправильный результат", p.Date)
+	}
+	//
+	if strings.Compare(p.Title, "") != 0 {
+		t.Fatalf("неправильный результат", p.Title)
+	}
+	if strings.Compare(p.Id, pathposts+string(os.PathSeparator)+"1114.md") != 0 {
+		t.Fatalf("неправильный результат", p.Title)
+	}
+}
+
+//сохранить пост в файл
+//func (p *Post) SavetoFile(namef string) {
+func TestSavetoFile(t *testing.T) {
 }

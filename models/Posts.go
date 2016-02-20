@@ -37,6 +37,7 @@ func (p *Post) GetDraft() bool {
 }
 
 // вывод на экран
+// t-
 func (p *Post) Print() {
 	fmt.Println("Id post: 			", p.Id)
 	fmt.Println("Date create post:  ", p.Date)
@@ -46,7 +47,7 @@ func (p *Post) Print() {
 	fmt.Println("ContentText post: 	", p.ContentText)
 }
 
-// новый пост
+// новый пост, создается как черновик
 func (p *Post) New() {
 	p.Id = ""
 	p.SetDraft(true) // черновик
@@ -58,6 +59,7 @@ func (p *Post) New() {
 }
 
 //сохранить пост в файл
+// t-
 func (p *Post) SavetoFile(namef string) {
 	p.New()
 	stitle := "title: " + "\"" + p.Title + "\"" + "\n"
@@ -68,6 +70,7 @@ func (p *Post) SavetoFile(namef string) {
 }
 
 //сохранить пост в файл c уникальным номером в имени файла, возвращает имени файла который создался
+//  t?
 func (p *Post) SavetoUniqFile(pathposts string) string {
 	var uniqname string
 	namefs := utils.Getlistfileindirectory(pathposts)
@@ -90,6 +93,7 @@ func (p *Post) SavetoUniqFile(pathposts string) string {
 }
 
 // полчение текста поста блога из файла : первая строка это заголовок сообщения, вторая и последующие это само сообщение - возвращает кол-во черновых сообщений (draft=true)
+// t+
 func (p *Post) GetPostfromFileMd(namef string) {
 	var (
 		titleRegexp   = regexp.MustCompile(`title:\s*\".+\"`)
@@ -164,6 +168,7 @@ func (p *Post) GetPostfromFileMd(namef string) {
 }
 
 // возвращает сообщение не черновик, если нет нормальных сообщений то возращается -1, иначе возвращается текущий номер позиции
+//t+
 func (p *Post) GetNormalPost(namefs []string, npos int) (int, int) {
 	var koldraft int
 	if (npos < 0) || (npos >= len(namefs)) {
@@ -187,6 +192,7 @@ func (p *Post) GetNormalPost(namefs []string, npos int) (int, int) {
 }
 
 // получить сообщения из папки pathposts в кол-ве kolpost начиная с позиции tekpos - возвр-ет массив  []Post,кол-во файлов в папке, кол-во черновых сообщений
+// t+
 func GetPostsNewPos(pathposts string, tekpos int, kolpost int) ([]Post, int, int) {
 	var (
 		pp       Post
